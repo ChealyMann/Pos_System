@@ -57,9 +57,21 @@ Route::controller(Usercontroller::class)->group(function () {
 });
 
 
+git fetch              # update 'master' from remote
+git tag base master    # mark our base point
+git rebase -i master   # rewrite some commits
+git push --force-with-lease=master:base master:master
+
+git branch -M master
+
 
 git init
 git add .
 git commit -m "First commit"
+
+git remote add origin https://github.com/rathana4530/POS_System_SA.git
+
+git push -u origin master
 git push -u origin Rathana
+
 git pull origin Rathana
