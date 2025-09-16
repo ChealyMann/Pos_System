@@ -11,9 +11,9 @@ class StockController extends Controller
 {
     public function index()
     {
-        $products = DB::table('tblproducts')->get();
-        $stocks = DB::table('tblstocks as s')
-            ->join('tblproducts as p', 's.product_id', '=', 'p.product_id')
+        $products = DB::table('products')->get();
+        $stocks = DB::table('stocks as s')
+            ->join('products as p', 's.product_id', '=', 'p.product_id')
             ->select(
                 's.product_id',
                 'p.barcode',
