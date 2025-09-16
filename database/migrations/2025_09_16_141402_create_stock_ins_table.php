@@ -1,0 +1,53 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('stock_ins', function (Blueprint $table) {
+            $table->id('stock_in_id'); // Primary key
+
+            // Foreign keys
+            $table->unsignedBigInteger('purchase_id');
+            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('created_by'); // user_id of the staff who created this record
+
+            $table->integer('qty');
+            $table->decimal('cost_per_item', 10, 2);
+            $table->date('expiry_date')->nullable(); // in case some products don’t expire
+            $table->decimal('total_cost', 10, 2);
+            $table->integer('qty_in_stock');
+            $table->date('stock_in_date');
+            $table->timestamps();
+
+            // Foreign key constraints
+            $table->foreign('purchase_id')
+                ->references('purchase_id')->on('purchases')
+                ->onDelete('cascade');
+
+            $table->foreign('product_id')
+                ->references('product_id')->on('products')
+                ->onDelete('cascade');
+
+            $table->foreign('created_by')
+                ->references('user_id')->on('users')
+                ->onDelete('cascade');
+        });
+
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('stock_ins');
+    }
+};

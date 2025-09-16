@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Stock extends Model
+class Stock_in extends Model
 {
-        protected $table = 'tblstock';
-    protected $primaryKey = 'stock_id';  // if different from 'id'
+    protected $table = 'tblstock_ins';
+    protected $primaryKey = 'stock_in_id';  // if different from 'id'
     public $timestamps = false;
 
     protected $fillable = [
@@ -16,5 +16,8 @@ class Stock extends Model
         'cost',
         'qty',
         'expire_date',
+        'user_id',
+        'add_date',
+        'in_stock',
     ];
 }

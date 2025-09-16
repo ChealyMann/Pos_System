@@ -23,7 +23,7 @@
                         data-bs-dismiss="modal" aria-label="Close" onmouseover="this.style.background='#eee'"
                         onmouseout="this.style.background='#fff'">&#10006;</button>
                 </div>
-                <form action="{{ url('stock/store') }}" method="POST">
+                <form action="{{ route('stock.store') }}" method="POST">
                     @csrf
                     <div class="modal-body" style="padding-top:0;">
                         <div class="row g-4">
@@ -33,9 +33,13 @@
                                     required style="background:#f9f6f6; border:1px solid #ccc; border-radius:6px;">
                             </div>
                             <div class="col-md-6">
-                                <label for="name" class="form-label">Product Name</label>
-                                <input type="text" class="form-control" id="name" name="name" required
-                                    style="background:#f9f6f6; border:1px solid #ccc; border-radius:6px;">
+                                <label for="product_id" class="form-label">Product Name</label>
+                                <select name="product_id" id="product_id" class="form-control bg-white">
+                                    <option value="">-- Select Product --</option>
+                                    @foreach($products as $product)
+                                        <option value="{{ $product->product_id }}">{{ $product->product_name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label for="price" class="form-label">Cost</label>
@@ -69,42 +73,30 @@
             <table class="table align-middle mb-0">
                 <thead>
                     <tr>
-                        <th>Stock ID</th>
+                        <th>Barcode</th>
                         <th>Product Name</th>
                         <th>Average Cost</th>
                         <th>Quantity</th>
-
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Example row, repeat as needed -->
+                    @foreach($stocks as $stock)
                     <tr>
-                        <td>121</td>
-                        <td>Coca Cola</td>
-                        <td>2.50</td>
-                        <td>1200</td>
-
+                        <td>{{ $stock->barcode }}</td>
+                        <td>{{ $stock->product_name }}</td>
+                        <td>{{ number_format($stock->avg_cost, 2) }}</td>
+                        <td>{{ $stock->total_qty_in_stock }}</td>
                         <td>
-                            <button class="btn btn-outline-success btn-sm me-2"><i class="bi bi-eye"></i> View</button>
-
+                            <a href="{{ url('stock_in/' . $stock->product_id) }}" class="btn btn-outline-success btn-sm me-2">
+                                <i class="bi bi-eye"></i> View
+                            </a>
                         </td>
                     </tr>
-                    <!-- Repeat above <tr> for more products -->
-                    <tr>
-                        <td>122</td>
-                        <td>Vitail Water 1.5L</td>
-                        <td>0.50</td>
-                        <td>100</td>
-
-                        <td>
-                            <button class="btn btn-outline-success btn-sm me-2"><i class="bi bi-eye"></i> View</button>
-
-                        </td>
-                    </tr>
-
-                    <!-- ...more rows as needed -->
+                    @endforeach
                 </tbody>
+            </table>
+
             </table>
         </div>
     </div>

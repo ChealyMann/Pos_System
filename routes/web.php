@@ -11,6 +11,7 @@ use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\StockInController;
 use App\Http\Controllers\ReportController;
 
 
@@ -28,4 +29,8 @@ Route::resource('/category', CategorieController::class);
 Route::resource('/role', RoleController::class);
 Route::resource('/sale', SaleController::class);
 Route::resource('/stock', StockController::class);
+Route::resource('/stock_in', StockInController::class);
 Route::resource('/report', ReportController::class);
+
+// Handle Add Stock form submission
+Route::post('/stock/store', [StockController::class, 'store'])->name('stock.store');
