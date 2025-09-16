@@ -55,3 +55,11 @@ php artisan db:seed --class=ProductSeeder
 Route::controller(Usercontroller::class)->group(function () {
     Route::get('/user', 'index')->name('user.index');
 });
+
+
+
+git init
+git add .
+git commit -m "First commit"
+git push -u origin Rathana
+git pull origin Rathana
