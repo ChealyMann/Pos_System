@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id');  // FK to products
 
             $table->integer('qty');
-            $table->decimal('cost_per_item', 10, 2);
+            $table->decimal('unit_cost', 10, 2);
             $table->date('expiry_date')->nullable(); // in case some products don’t expire
             $table->decimal('total_cost', 10, 2);
             $table->timestamps();

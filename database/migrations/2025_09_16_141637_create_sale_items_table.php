@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id'); // FK to products
 
             $table->integer('qty');
-            $table->decimal('price_per_item', 10, 2);
+            $table->decimal('unit_price', 10, 2);
             $table->decimal('total_price', 10, 2);
             $table->timestamps();
 

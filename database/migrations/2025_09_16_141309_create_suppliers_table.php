@@ -18,9 +18,6 @@ return new class extends Migration
             $table->string('alt_phone_number')->nullable();
             $table->string('email')->unique();
             $table->string('address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('postal_code')->nullable();
-            $table->string('country')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->unsignedBigInteger('created_by');
             $table->timestamps();

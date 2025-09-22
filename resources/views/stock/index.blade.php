@@ -23,13 +23,13 @@
                         data-bs-dismiss="modal" aria-label="Close" onmouseover="this.style.background='#eee'"
                         onmouseout="this.style.background='#fff'">&#10006;</button>
                 </div>
-                <form action="{{ route('stock.store') }}" method="POST">
+                <form action="{{ route('stock_in.store') }}" method="POST">
                     @csrf
                     <div class="modal-body" style="padding-top:0;">
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label for="purchase_id" class="form-label">Purchase ID</label>
-                                <input type="text" class="form-control" id="purchase_id" name="purchase_id" value="#"
+                                <input type="text" class="form-control" id="purchase_id" name="purchase_id" value=""
                                     required style="background:#f9f6f6; border:1px solid #ccc; border-radius:6px;">
                             </div>
                             <div class="col-md-6">

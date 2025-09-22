@@ -28,9 +28,13 @@ Route::resource('/purchase', PurchaseController::class);
 Route::resource('/category', CategorieController::class);
 Route::resource('/role', RoleController::class);
 Route::resource('/sale', SaleController::class);
-Route::resource('/stock', StockController::class);
+//Route::resource('/stock', StockController::class);
 Route::resource('/stock_in', StockInController::class);
 Route::resource('/report', ReportController::class);
 
 // Handle Add Stock form submission
-Route::post('/stock/store', [StockController::class, 'store'])->name('stock.store');
+Route::prefix('stock')->name('stock.')->group(function () {
+    Route::get('/', [StockController::class, 'index'])->name('index');
+    Route::post('/store', [StockController::class, 'store'])->name('store');
+});
+

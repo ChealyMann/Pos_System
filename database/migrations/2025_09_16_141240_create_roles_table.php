@@ -16,12 +16,7 @@ return new class extends Migration
             $table->string('role_name')->unique();
             $table->string('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->unsignedBigInteger('created_by');
             $table->timestamps();
-
-            $table->foreign('created_by')
-                ->references('user_id')->on('users')
-                ->onDelete('cascade');
         });
     }
 

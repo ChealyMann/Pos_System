@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
-    protected $table = 'tblproducts';      // your table name
+    protected $table = 'products';      // your table name
     protected $primaryKey = 'product_id';  // the actual PK column
     public $timestamps = false;
 
