@@ -23,8 +23,7 @@ return new class extends Migration
             $table->decimal('cost_per_item', 10, 2);
             $table->date('expiry_date')->nullable(); // in case some products don’t expire
             $table->integer('qty_in_stock');
-            $table->date('stock_in_date');
-            $table->timestamps();
+            $table->timestamps('stock_in_date');
 
             // Foreign key constraints
             $table->foreign('purchase_id')

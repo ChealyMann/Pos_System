@@ -11,10 +11,8 @@ class Stock extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'purchase_id',
         'product_id',
-        'cost',
-        'qty',
-        'expire_date',
+        'avg_cost',
+        'total_qty_in_stock',
     ];
 }
