@@ -23,7 +23,12 @@ return new class extends Migration
             $table->decimal('cost_per_item', 10, 2);
             $table->date('expiry_date')->nullable(); // in case some products don’t expire
             $table->integer('qty_in_stock');
-            $table->timestamps('stock_in_date');
+
+            // If you want custom date for stock-in
+            $table->timestamp('stock_in_date')->useCurrent();
+
+            // Laravel default timestamps (created_at, updated_at)
+            $table->timestamps();
 
             // Foreign key constraints
             $table->foreign('purchase_id')
@@ -38,6 +43,7 @@ return new class extends Migration
                 ->references('user_id')->on('users')
                 ->onDelete('cascade');
         });
+
 
     }
 
