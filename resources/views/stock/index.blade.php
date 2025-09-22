@@ -23,14 +23,17 @@
                         data-bs-dismiss="modal" aria-label="Close" onmouseover="this.style.background='#eee'"
                         onmouseout="this.style.background='#fff'">&#10006;</button>
                 </div>
-                <form action="{{ route('stock_in.store') }}" method="POST">
-                    @csrf
-                    <div class="modal-body" style="padding-top:0;">
+                    <form action="{{ route('stock_in.store') }}" method="POST">
+                        @csrf
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <label for="purchase_id" class="form-label">Purchase ID</label>
-                                <input type="text" class="form-control" id="purchase_id" name="purchase_id" value=""
-                                    required style="background:#f9f6f6; border:1px solid #ccc; border-radius:6px;">
+                                <label for="purchase_id" class="form-label">Purchase</label>
+                                <select name="purchase_id" id="purchase_id" class="form-control bg-white">
+                                    <option value="">-- Select Purchase --</option>
+                                    @foreach($purchases as $purchases)
+                                        <option value="{{ $purchases->purchase_id }}">{{ $purchases->purchase_id }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label for="product_id" class="form-label">Product Name</label>
@@ -42,29 +45,23 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label for="price" class="form-label">Cost</label>
-                                <input type="number" step="0.01" class="form-control" id="price" name="price" required
-                                    style="background:#f9f6f6; border:1px solid #ccc; border-radius:6px;">
+                                <label for="cost_per_item" class="form-label">Cost</label>
+                                <input type="number" step="0.01" class="form-control" id="cost_per_item" name="cost_per_item" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="qty" class="form-label">Quantity</label>
-                                <input type="number" class="form-control" id="qty" name="qty" required
-                                    style="background:#f9f6f6; border:1px solid #ccc; border-radius:6px;">
+                                <input type="number" class="form-control" id="qty" name="qty" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="expire_date" class="form-label">Expire Date</label>
-                                <input type="date" class="form-control" id="expire_date" name="expire_date"
-                                    placeholder="YY / MM / DD"
-                                    style="background:#f9f6f6; border:1px solid #ccc; border-radius:6px;">
+                                <input type="date" class="form-control" id="expire_date" name="expire_date">
                             </div>
                         </div>
                         <div class="d-flex justify-content-center mt-4">
-                            <button type="submit" class="btn"
-                                style="background:#176c46; color:#fff; min-width:220px; border-radius:6px; font-weight:500; font-size:1.1rem; padding:10px 0; box-shadow:0 2px 8px rgba(23,108,70,0.08);">Add
-                                Stock</button>
+                            <button type="submit" class="btn btn-success px-4">Add Stock</button>
                         </div>
-                    </div>
-                </form>
+                    </form>
+
             </div>
         </div>
     </div>

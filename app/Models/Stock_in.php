@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Stock_in extends Model
 {
     protected $table = 'stock_ins';
-    protected $primaryKey = 'stock_in_id';  // if different from 'id'
-    public $timestamps = false;
+    protected $primaryKey = 'stock_in_id';
+    public $timestamps = true;
 
     protected $fillable = [
         'purchase_id',
@@ -18,6 +18,6 @@ class Stock_in extends Model
         'cost_per_item',
         'expire_date',
         'qty_in_stock',
-        'stock_in_date',
+        'stock_in_date'
     ];
 }

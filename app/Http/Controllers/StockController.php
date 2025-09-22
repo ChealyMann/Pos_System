@@ -6,12 +6,15 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\Stock_in;
+use App\Models\Purchase;
 use Illuminate\Support\Facades\DB;
 class StockController extends Controller
 {
     public function index()
     {
-        $products = DB::table('products')->get();
+        $products = Product::all();
+        $purchases = Purchase::all(); // ✅ add this
+
         $stocks = DB::table('stocks as s')
             ->join('products as p', 's.product_id', '=', 'p.product_id')
             ->select(
@@ -22,17 +25,16 @@ class StockController extends Controller
                 's.total_qty_in_stock'
             )
             ->get();
-        return view('stock.index', compact('stocks','products'));
+
+        return view('stock.index', compact('stocks', 'products', 'purchases'));
     }
 
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'purchase_id' => 'required|integer|exists:tblpurchases,id',
             'product_id'  => 'required|integer|exists:tblproducts,product_id', // match PK column
-            'cost'        => 'required|numeric|min:0',
-            'qty'         => 'required|integer|min:1',
-            'expire_date' => 'required|date',
+            'avg_cost'        => 'required|numeric|min:0',
+            'total_qty_in_stock'         => 'required|integer|min:1',
         ]);
 
         Stock::create($validatedData);

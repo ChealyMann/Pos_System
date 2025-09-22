@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->integer('qty');
             $table->decimal('cost_per_item', 10, 2);
-            $table->date('expiry_date')->nullable(); // in case some products don’t expire
+            $table->date('expire_date')->nullable(); // in case some products don’t expire
             $table->integer('qty_in_stock');
 
             // If you want custom date for stock-in

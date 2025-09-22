@@ -28,12 +28,12 @@
                         <tr>
                             <td>{{ $stock_in->purchase_id }}</td>
                             <td>{{ $stock_in->product_id }}</td>
-                            <td>{{ $stock_in->cost }}</td>
+                            <td>{{ $stock_in->cost_per_item }}</td>
                             <td>{{ $stock_in->qty }}</td>
                             <td>{{ $stock_in->expire_date }}</td>
-                            <td>{{ $stock_in->user_id }}</td>
-                            <td>{{ $stock_in->add_date }}</td>
-                            <td>{{ $stock_in->in_stock }}</td>
+                            <td>{{ $stock_in->created_by }}</td>
+                            <td>{{ $stock_in->stock_in_date }}</td>
+                            <td>{{ $stock_in->qty_in_stock }}</td>
                         </tr>
                         @endforeach
                     </tbody>

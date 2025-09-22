@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Stock_in;
+use App\Models\Stock;
 
 class StockInController extends Controller
 {
@@ -15,28 +16,44 @@ class StockInController extends Controller
 
     public function store(Request $request)
     {
-        $userId = 3; // The user creating the stock entry
+        $userId = 2; // The user creating the stock entry
 
-        // Validate request
         $validatedData = $request->validate([
             'purchase_id'    => 'required|integer|exists:purchases,purchase_id',
             'product_id'     => 'required|integer|exists:products,product_id',
             'cost_per_item'  => 'required|numeric|min:0',
             'qty'            => 'required|integer|min:1',
-            'expiry_date'    => 'nullable|date',   // nullable because your table allows null
-            'stock_in_date'  => 'required|date',
+            'expire_date'    => 'nullable|date',
         ]);
 
-        // Enforce created_by = $userId
         $validatedData['created_by'] = $userId;
-
-        // qty_in_stock defaults to qty if not provided
         $validatedData['qty_in_stock'] = $request->input('qty_in_stock', $validatedData['qty']);
+        $validatedData['stock_in_date'] = now();
 
-        // Insert into stock_in table
         Stock_in::create($validatedData);
+
+        // 2. Update or insert into stocks table
+        $stock = Stock::where('product_id', $validatedData['product_id'])->first();
+
+        if ($stock) {
+            // recalc avg cost = (old_total_cost + new_total_cost) / (old_qty + new_qty)
+            $oldTotalCost = $stock->avg_cost * $stock->total_qty_in_stock;
+            $newTotalCost = $validatedData['cost_per_item'] * $validatedData['qty'];
+            $newQty = $stock->total_qty_in_stock + $validatedData['qty'];
+
+            $stock->avg_cost = ($oldTotalCost + $newTotalCost) / $newQty;
+            $stock->total_qty_in_stock = $newQty;
+            $stock->save();
+        } else {
+            Stock::create([
+                'product_id'          => $validatedData['product_id'],
+                'avg_cost'            => $validatedData['cost_per_item'],
+                'total_qty_in_stock'  => $validatedData['qty'],
+            ]);
+        }
 
         return redirect()->route('stock.index')
                         ->with('success', 'Stock added successfully!');
     }
+
 }

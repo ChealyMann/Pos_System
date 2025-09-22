@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stock extends Model
 {
-        protected $table = 'stocks';
+    protected $table = 'stocks';
     protected $primaryKey = 'stock_id';  // if different from 'id'
     public $timestamps = false;
 
