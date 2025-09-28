@@ -10,11 +10,11 @@
                 </a>
                 <h3 class="fw-bold mb-0">Edit Supplier</h3>
             </div>
-            
+
             <form action="{{ route('supplier.update', $supplier->supplier_id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
-                
+
                 <div class="row mb-4">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Supplier Code</label>
@@ -32,16 +32,16 @@
                         <label class="form-label fw-bold">Phone</label>
                         <input type="text" class="form-control bg-white" name="phone" value="{{ old('phone', $supplier->phone_number) }}" />
                     </div>
-                    
+
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Gender</label>
                         <div class="d-flex align-items-center gap-4 mt-2">
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="gender" id="male" value="Male" @if(old('gender', $supplier->gender) == 'Male') checked @endif>
+                                <input class="form-check-input" type="radio" name="gender" id="male" value="male" {{$supplier->gender == 'male' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="male">Male</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="gender" id="female" value="Female" @if(old('gender', $supplier->gender) == 'Female') checked @endif>
+                                <input class="form-check-input" type="radio" name="gender" id="female" value="female" {{$supplier->gender == 'female' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="female">Female</label>
                             </div>
                         </div>
@@ -58,17 +58,15 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Create Date</label>
-                        <input type="date" class="form-control bg-white" name="create_date" value="{{ old('create_date', date('Y-m-d', strtotime($supplier->create_date))) }}" />
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Status</label>
-                        <input type="text" class="form-control bg-white" name="status" value="{{ old('status', $supplier->status ?? 'Active') }}" />
+                        <select name="status" class="form-control bg-white">
+                            <option value="Active" {{$supplier->status == 'active'? 'selected' : ''}} >Active</option>
+                            <option value="Inactive" {{$supplier->status == 'inactive'? 'selected' : ''}}>Inactive</option>
+                        </select>
                     </div>
                 </div>
-                
+
                 <div class="text-center mt-5">
                     <button type="submit" class="btn"
                         style="background:#137844; color:#fff; font-size:1.3rem; border-radius:8px; min-width:300px; font-weight:500;">

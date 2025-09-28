@@ -27,4 +27,14 @@ class SaleController extends Controller
         // Pass the sales collection to the index view
         return view('sale.index', compact('sales'));
     }
+    public function show($id)
+    {
+        $sale = Sale::findOrFail($id);
+        $saleItems = Sale_item::with('product')
+            ->where('sale_id', $id)
+            ->get();
+        $user = User::where('user_id', $sale->sale_by)->first();
+
+        return view('sale.view_details', compact('sale', 'saleItems', 'user'));
+    }
 }

@@ -2,7 +2,6 @@
 
 @section('content')
     <div class="col-lg-10 col-md-10 px-4 py-3" style="background:#f5f5f5; min-height:100vh;">
-        
         <div class="bg-light rounded-3 p-4 mb-3" style="position: sticky; top: 105px;">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <a href="{{ url('sale') }}" class="btn btn-sm btn-outline-secondary me-3">
@@ -22,7 +21,7 @@
                     </div>
                     <div class="col-md-4 mb-2">
                         <p class="mb-0 fw-semibold text-secondary">User/Cashier:</p>
-                        <p class="fw-bold fs-5">{{ $sale->user_name ?? '---' }}</p>
+                        <p class="fw-bold fs-5">{{ $user->user_name ?? '---' }}</p>
                     </div>
                     <div class="col-md-4 mb-2">
                         <p class="mb-0 fw-semibold text-secondary">Sale Date:</p>
@@ -38,14 +37,14 @@
                     </div>
                     <div class="col-md-4 mb-2">
                         <p class="mb-0 fw-semibold text-secondary">Payment Status:</p>
-                        <span class="badge {{ $sale->payment_status == 'Paid' ? 'bg-success' : 'bg-warning' }}">
-                            {{ $sale->payment_status ?? 'Pending' }}
+                        <span class="badge {{ $sale->status == 'Paid' ? 'bg-warningbg-success' : 'bg-success' }}">
+                            {{ $sale->status ?? 'Pending' }}
                         </span>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="bg-light rounded-3 p-4">
             <h5 class="fw-bold mb-3">Items Sold</h5>
             <div class="table-responsive">
@@ -60,13 +59,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($sale_items as $item)
+                        @forelse ($saleItems as $item)
                             <tr>
-                                <td>{{ $item->product_barcode }}</td>
-                                <td>{{ $item->product_name }}</td>
-                                <td class="text-end">${{ number_format($item->price, 2) }}</td>
-                                <td class="text-end">{{ $item->qty }}</td>
-                                <td class="text-end fw-semibold">${{ number_format($item->sub_total, 2) }}</td>
+                                <td>{{ $item->product->barcode ?? '' }}</td>
+                                <td>{{ $item->product->product_name ?? '' }}</td>
+                                <td class="text-end">${{ number_format($item->unit_price ?? 0, 2) }}</td>
+                                <td class="text-end">{{ $item->qty ?? 0 }}</td>
+                                <td class="text-end fw-semibold">${{ number_format($item->total_price ?? 0, 2) }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -83,6 +82,5 @@
                 </table>
             </div>
         </div>
-        
     </div>
 @endsection
