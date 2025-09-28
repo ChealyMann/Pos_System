@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Stock_in;
 use App\Models\Stock;
+use App\Models\Product;
 
 class StockInController extends Controller
 {
     public function show($id)
     {
         $stock_ins = Stock_in::where('product_id', $id)->get();
-        return view('stock.stock_detail' , compact('stock_ins'));
+        $products = Product::all();
+        return view('stock.stock_detail' , compact('stock_ins', 'products'));
     }
 
     public function store(Request $request)

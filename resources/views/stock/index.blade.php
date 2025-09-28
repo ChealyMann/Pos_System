@@ -6,10 +6,23 @@
     <div class="bg-light rounded-3 p-4 mb-3" style="position: sticky; top: 105px;">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h4 class="fw-bold mb-0">Stock</h4>
-            <button type="button" class="btn btn-success px-4 py-2" style="border-radius:8px;font-weight:500;"
-                data-bs-toggle="modal" data-bs-target="#addStockModal">
-                <i class="bi bi-plus-lg me-2"></i>Add Stock
-            </button>
+
+            <div class="d-flex align-items-center" style="margin-left: auto; gap: 16px;">
+                <form method="GET" class="d-flex align-items-center">
+                    <select name="filter" class="form-select me-3" style="max-width:180px;">
+                        <option value="all" {{ request('filter') == 'all' ? 'selected' : '' }}>All</option>
+                        <option value="in_stock" {{ request('filter') == 'in_stock' ? 'selected' : '' }}>In Stock</option>
+                        <option value="out_stock" {{ request('filter') == 'out_stock' ? 'selected' : '' }}>Out Stock</option>
+                    </select>
+                    <button type="submit" class="btn btn-success px-4" style="width:180px;">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+                </form>
+                <button type="button" class="btn btn-success px-4 py-2" style="border-radius:8px;font-weight:500;"
+                    data-bs-toggle="modal" data-bs-target="#addStockModal">
+                    <i class="bi bi-plus-lg me-2"></i>Add Stock
+                </button>
+            </div>
         </div>
     </div>
     <!-- Add Stock Modal -->
@@ -73,24 +86,68 @@
                         <th>Barcode</th>
                         <th>Product Name</th>
                         <th>Average Cost</th>
-                        <th>Quantity</th>
+                        <th>Total Quantity</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($stocks as $stock)
-                    <tr>
-                        <td>{{ $stock->barcode }}</td>
-                        <td>{{ $stock->product_name }}</td>
-                        <td>{{ number_format($stock->avg_cost, 2) }}</td>
-                        <td>{{ $stock->total_qty_in_stock }}</td>
-                        <td>
-                            <a href="{{ url('stock_in/' . $stock->product_id) }}" class="btn btn-outline-success btn-sm me-2">
-                                <i class="bi bi-eye"></i> View
-                            </a>
-                        </td>
-                    </tr>
-                    @endforeach
+                    @if (request('filter') == 'in_stock')
+                        @foreach($stocks as $stock)
+                            @if ($stock->total_qty_in_stock > 0)
+                                <tr>
+                                    <td>{{ $stock->barcode }}</td>
+                                    <td>{{ $stock->product_name }}</td>
+                                    <td>{{ number_format($stock->avg_cost, 2) }}</td>
+                                    <td>{{ $stock->total_qty_in_stock }}</td>
+                                    <td>
+                                        <a href="{{ url('stock_in/' . $stock->product_id) }}" class="btn btn-outline-success btn-sm me-2">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    @elseif (request('filter') == 'out_stock')
+                        @foreach($stocks as $stock)
+                            @if ($stock->total_qty_in_stock <= 0)
+                                <tr class="table-danger">
+                                    <td>{{ $stock->barcode }}</td>
+                                    <td>{{ $stock->product_name }}</td>
+                                    <td>{{ number_format($stock->avg_cost, 2) }}</td>
+                                    <td>{{ $stock->total_qty_in_stock }}</td>
+                                    <td>
+                                        <a href="{{ url('stock_in/' . $stock->product_id) }}" class="btn btn-outline-success btn-sm me-2">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endif
+                        @endforeach
+
+                    @else
+                        @if ($stocks->isEmpty())
+                            <td colspan="5" class="text-center text-danger">No Data Found!</td>
+                        @else
+                            @foreach($stocks as $stock)
+                                @if ($stock->total_qty_in_stock <= 0)
+                                    <tr class="table-danger">
+                                @else
+                                    <tr>
+                                @endif
+                                    <td>{{ $stock->barcode }}</td>
+                                    <td>{{ $stock->product_name }}</td>
+                                    <td>{{ number_format($stock->avg_cost, 2) }}</td>
+                                    <td>{{ $stock->total_qty_in_stock }}</td>
+                                    <td>
+                                        <a href="{{ url('stock_in/' . $stock->product_id) }}" class="btn btn-outline-success btn-sm me-2">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
+
+                    @endif
                 </tbody>
             </table>
 

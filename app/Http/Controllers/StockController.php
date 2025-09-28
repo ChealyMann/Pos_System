@@ -28,18 +28,4 @@ class StockController extends Controller
 
         return view('stock.index', compact('stocks', 'products', 'purchases'));
     }
-
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'product_id'  => 'required|integer|exists:tblproducts,product_id', // match PK column
-            'avg_cost'        => 'required|numeric|min:0',
-            'total_qty_in_stock'         => 'required|integer|min:1',
-        ]);
-
-        Stock::create($validatedData);
-
-        return redirect()->route('stock.index')
-                        ->with('success', 'Stock added successfully!');
-    }
 }
