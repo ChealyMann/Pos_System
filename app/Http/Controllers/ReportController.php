@@ -14,51 +14,18 @@ class ReportController extends Controller
         return view('report.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function sale()
     {
-        //
+        return view('report.sale_report');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function purchase()
     {
-        //
+        return view('report.purchase_report');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function stock()
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return view('report.stock_report');
     }
 }

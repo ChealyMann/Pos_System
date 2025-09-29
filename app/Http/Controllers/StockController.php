@@ -13,7 +13,7 @@ class StockController extends Controller
     public function index()
     {
         $products = Product::all();
-        $purchases = Purchase::all(); // ✅ add this
+        $purchases = Purchase::all();
 
         $stocks = DB::table('stocks as s')
             ->join('products as p', 's.product_id', '=', 'p.product_id')

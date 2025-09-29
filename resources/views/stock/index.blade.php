@@ -43,8 +43,8 @@
                                 <label for="purchase_id" class="form-label">Purchase</label>
                                 <select name="purchase_id" id="purchase_id" class="form-control bg-white">
                                     <option value="">-- Select Purchase --</option>
-                                    @foreach($purchases as $purchases)
-                                        <option value="{{ $purchases->purchase_id }}">{{ $purchases->purchase_id }}</option>
+                                    @foreach($purchases as $purchase)
+                                        <option value="{{ $purchase->purchase_id }}">{{ $purchase->purchase_id }}</option>
                                     @endforeach
                                 </select>
                             </div>

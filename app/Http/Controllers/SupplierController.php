@@ -120,7 +120,6 @@ class SupplierController extends Controller
         return redirect()->route('supplier.index')->with('success', 'Supplier updated successfully!');
     }
 
-
     /**
      * Remove the specified supplier from storage.
      */

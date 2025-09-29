@@ -4,18 +4,10 @@
 @section('content')
 <div class="col-lg-10 col-md-10 px-4 py-3" style="background:#dbdbdb; min-height:100vh;">
     <div class="bg-light rounded-3 p-4 mb-4">
-        <h3 class="fw-bold mb-0">Report</h3>
+        <h3 class="fw-bold mb-0">Purchase Report</h3>
     </div>
     <div class="bg-light rounded-3 p-4 mb-4">
         <form class="row align-items-end g-3">
-            <div class="col-md-6 mb-3">
-                <label class="form-label fw-bold">Report Type</label>
-                <select class="form-control bg-white">
-                    <option value="stock">Stock</option>
-                    <option value="stock">Sale</option>
-                    <!-- Add more report types as needed -->
-                </select>
-            </div>
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold">From Date</label>
                 <input type="date" class="form-control bg-white" value="2025-11-08">
