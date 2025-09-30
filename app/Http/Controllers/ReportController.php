@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -28,4 +29,10 @@ class ReportController extends Controller
     {
         return view('report.stock_report');
     }
+
+    public function financial()
+    {
+        return view('report.financial_report');
+    }
+
 }

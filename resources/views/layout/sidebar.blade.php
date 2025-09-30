@@ -55,7 +55,7 @@
 
                     {{-- Report Dropdown --}}
                     <div class="nav-item">
-                        <a class="nav-link dropdown-toggle {{ Request::is(['report/sale*','report/stock*','report/purchase*']) ? 'active' : '' }}"
+                        <a class="nav-link dropdown-toggle {{ Request::is(['report/sale*','report/stock*','report/purchase*','report/financial*']) ? 'active' : '' }}"
                         data-bs-toggle="collapse" href="#reportMenu" role="button"
                         aria-expanded="{{ Request::is('report/*') ? 'true' : 'false' }}">
                             <i class="bi bi-graph-up-arrow me-2"></i>Report
@@ -69,6 +69,9 @@
                             </a>
                             <a href="{{ route('report.purchase') }}" class="nav-link {{ Request::is('report/purchase*') ? 'active' : '' }}">
                                 <i class="bi bi-cart-check me-2"></i> Purchase Report
+                            </a>
+                            <a href="{{ route('report.financial') }}" class="nav-link {{ Request::is('report/financial*') ? 'active' : '' }}">
+                                <i class="bi bi-currency-dollar me-2"></i> Financial Report
                             </a>
                         </div>
                     </div>

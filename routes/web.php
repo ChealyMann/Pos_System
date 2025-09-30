@@ -42,5 +42,7 @@ Route::controller(ReportController::class)->group(function () {
     Route::get('report/stock', 'stock')->name('report.stock');
     Route::get('report/sale', 'sale')->name('report.sale');
     Route::get('report/purchase', 'purchase')->name('report.purchase');
+    Route::get('report/financial', 'financial')->name('report.financial');
+    Route::post('report/filter', 'filter')->name('report.filter');
 });
 

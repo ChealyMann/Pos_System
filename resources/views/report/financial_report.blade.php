@@ -4,23 +4,21 @@
 @section('content')
 <div class="col-lg-10 col-md-10 px-4 py-3" style="background:#dbdbdb; min-height:100vh;">
     <div class="bg-light rounded-3 p-4 mb-4">
-        <h3 class="fw-bold mb-0">Sale Report</h3>
+        <h3 class="fw-bold mb-0">Financial Report</h3>
     </div>
-
-    <!-- Filter Form -->
     <div class="bg-light rounded-3 p-4 mb-4">
-        <form id="filterForm" class="row align-items-end g-3">
-            @csrf
+        <form class="row align-items-end g-3">
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold">Report Name</label>
-                <input type="text" name="report_name" class="form-control bg-white" />
+                <input type="text" class="form-control bg-white" value="" />
             </div>
             <div class="col-md-6 mb-3">
-                <label for="report_type" class="form-label fw-bold">Report Type</label>
-                <select name="report_type" id="report_type" class="form-control bg-white">
+                <label for="product_id" class="form-label">Report Type</label>
+                <select name="product_id" id="product_id" class="form-control bg-white">
                     <option value="">-- Select Type --</option>
-                    <option value="monthly">Monthly Sales</option>
-                    <option value="product">Sales by Product</option>
+                    <option value="">Revenue Report</option>
+                    <option value="">Expenses Report</option>
+                    <option value="">Profit/Loss Report</option>
                 </select>
             </div>
             <div class="col-md-6 mb-3">
@@ -28,23 +26,23 @@
                 <input type="month" name="date" class="form-control bg-white" value="{{ date('Y-m') }}" />
             </div>
             <div class="col-md-6 mb-3 d-flex gap-3">
-                <button type="button" id="generateReport" class="btn" style="background:#18a05e; color:#fff; min-width:150px;">
-                    Generate Report
-                </button>
+                <button type="button" class="btn" style="background:#18a05e; color:#fff; min-width:150px;">Generate
+                    Report</button>
             </div>
         </form>
     </div>
-
-    <!-- Default Table -->
     <div class="bg-light rounded-3 p-4">
         <div class="table-responsive">
             <table class="table align-middle mb-0" style="border-collapse:separate;">
                 <thead>
+                    <thead>
                     <tr style="border-bottom:2px solid #aaa;">
-                        <th>Report ID</th>
-                        <th>Report Name</th>
-                        <th>Type</th>
-                        <th>Date</th>
+                        <th>ID</th>
+                        <th>Product Name</th>
+                        <th>Cost</th>
+                        <th>Quantity</th>
+                        <th>Reason</th>
+                        <th>Expire Date</th>
                         <th>User Name</th>
                         <th>Action</th>
                     </tr>
@@ -52,8 +50,10 @@
                 <tbody>
                     <tr>
                         <td>1</td>
-                        <td>Sale Report</td>
-                        <td>Monthly Sales</td>
+                        <td>Freppe Coffee</td>
+                        <td>2.50</td>
+                        <td>100</td>
+                        <td>80</td>
                         <td>07/07/2025</td>
                         <td>Bora</td>
                         <td>
@@ -69,4 +69,3 @@
     </div>
 </div>
 @endsection
-

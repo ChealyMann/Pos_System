@@ -9,6 +9,20 @@
     <div class="bg-light rounded-3 p-4 mb-4">
         <form class="row align-items-end g-3">
             <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Report Name</label>
+                <input type="text" name="report_name" class="form-control bg-white" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="product_id" class="form-label">Report Type</label>
+                <select name="product_id" id="product_id" class="form-control bg-white">
+                    <option value="">-- Select Type --</option>
+                    <option value="">Stock In Report</option>
+                    <option value="">Stock Out Report</option>
+                    <option value="">Expired Stock Report</option>
+                    <option value="">Current Stock Report</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold">From Date</label>
                 <input type="date" class="form-control bg-white" value="2025-11-08">
             </div>
@@ -17,8 +31,9 @@
                 <input type="date" class="form-control bg-white" value="2025-11-09">
             </div>
             <div class="col-md-6 mb-3 d-flex gap-3">
-                <button type="button" class="btn" style="background:#18a05e; color:#fff; min-width:150px;">Export Report</button>
-                <button type="submit" class="btn" style="background:#137844; color:#fff; min-width:150px;">Filter Report</button>
+                <button type="button" id="generateReport" class="btn" style="background:#18a05e; color:#fff; min-width:150px;">
+                    Generate Report
+                </button>
             </div>
         </form>
     </div>
@@ -34,7 +49,7 @@
                         <th>Reason</th>
                         <th>Expire Date</th>
                         <th>User Name</th>
-                        <th>Add Date</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,7 +61,11 @@
                         <td>80</td>
                         <td>07/07/2025</td>
                         <td>Bora</td>
-                        <td>07/07/2025</td>
+                        <td>
+                            <a href="" class="btn btn-outline-success btn-sm me-2">
+                                <i class="bi bi-eye"></i> View Detail
+                            </a>
+                        </td>
                     </tr>
                     <!-- More rows as needed -->
                 </tbody>
