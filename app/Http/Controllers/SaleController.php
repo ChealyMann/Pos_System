@@ -59,34 +59,70 @@
             ]);
 
             $user = auth()->user();
-            $userId = $user->user_id ?? $user->id; // support either pk
+            $userId = $user->user_id ?? $user->id;
 
-            $sale = DB::transaction(function () use ($data, $userId) {
+            // 1) Aggregate desired quantities per product (handles duplicates in cart)
+            $wanted = [];
+            foreach ($data['items'] as $it) {
+                $pid = (int) $it['product_id'];
+                $wanted[$pid] = ($wanted[$pid] ?? 0) + (int) $it['qty'];
+            }
+            $productIds = array_keys($wanted);
 
-                // 1) Create sale (matches your `sales` table)
+            $sale = DB::transaction(function () use ($data, $userId, $wanted, $productIds) {
+
+                // 2) Lock stock rows for these products
+                $stockRows = DB::table('stocks')
+                    ->whereIn('product_id', $productIds)
+                    ->lockForUpdate()
+                    ->get(['product_id', 'total_qty_in_stock']);
+
+                // Index by product_id for quick lookup
+                $stockByPid = $stockRows->keyBy('product_id');
+
+                // 3) Validate availability for ALL products before changing anything
+                foreach ($wanted as $pid => $qtyNeeded) {
+                    $row = $stockByPid->get($pid);
+                    $available = (int) ($row->total_qty_in_stock ?? 0);
+                    if ($available < $qtyNeeded) {
+                        // Throwing abort/exception will roll back the whole transaction
+                        abort(422, "Insufficient stock for product {$pid}. Needed {$qtyNeeded}, available {$available}.");
+                    }
+                }
+
+                // 4) Create sale
                 $sale = Sale::create([
                     'sale_by'        => $userId,
                     'total_amount'   => $data['total'],
                     'payment_method' => $data['payment_method'],
                     'status'         => 'paid',
-                    'sale_date'      => Carbon::today()->toDateString(),
+                    'sale_date'      => \Illuminate\Support\Carbon::today()->toDateString(),
                 ]);
 
-                // 2) Insert items (matches your `sale_items` table columns)
+                // 5) Insert items
                 foreach ($data['items'] as $it) {
                     $lineTotal = round($it['price'] * $it['qty'], 2);
 
                     Sale_item::create([
                         'sale_id'     => $sale->sale_id,
-                        'product_id'  => $it['product_id'],
-                        'qty'         => (int)$it['qty'],        // <-- use `qty`
-                        'unit_price'  => (float)$it['price'],
+                        'product_id'  => (int) $it['product_id'],
+                        'qty'         => (int) $it['qty'],
+                        'unit_price'  => (float) $it['price'],
                         'total_price' => $lineTotal,
                     ]);
+                }
 
-                    // Optional: decrement stock if you have a Stock model
-                    // \App\Models\Stock::where('product_id', $it['product_id'])
-                    //     ->decrement('total_qty_in_stock', (int)$it['qty']);
+                // 6) Decrement stock atomically (use a conditional WHERE to avoid going negative)
+                foreach ($wanted as $pid => $qtyNeeded) {
+                    $affected = DB::table('stocks')
+                        ->where('product_id', $pid)
+                        ->where('total_qty_in_stock', '>=', $qtyNeeded)
+                        ->decrement('total_qty_in_stock', $qtyNeeded);
+
+                    if ($affected === 0) {
+                        // Another concurrent sale probably took the stock; abort to roll back
+                        abort(409, "Concurrent update: stock changed for product {$pid}. Please try again.");
+                    }
                 }
 
                 return $sale;

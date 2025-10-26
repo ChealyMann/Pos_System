@@ -191,6 +191,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const cartKey = 'shoppingCart';
+            const stateKey = 'homeUIState';
             let cart = JSON.parse(localStorage.getItem(cartKey)) || {};
             const cartList = document.getElementById("cartList");
             let currentCategory = "all";
@@ -200,12 +201,18 @@
             const saveCart = () => localStorage.setItem(cartKey, JSON.stringify(cart));
             const money = n => `$${Number(n || 0).toFixed(2)}`;
 
-            // Clear legacy cart items without product_id to avoid checkout errors
+            // clean legacy items
             if (Object.values(cart).some(it => !it.product_id)) {
-                console.warn('Clearing legacy cart without product_id.');
                 cart = {};
                 saveCart();
             }
+
+            // restore UI state (category/search)
+            try {
+                const saved = JSON.parse(localStorage.getItem(stateKey) || '{}');
+                if (saved.category) currentCategory = saved.category;
+                if (saved.search)   currentSearch   = saved.search;
+            } catch {}
 
             function updateCart() {
                 cartList.innerHTML = "";
@@ -217,19 +224,24 @@
 
                     const row = document.createElement("div");
                     row.className = "cart-item row align-items-center my-2";
+
+                    const remaining = Math.max(0, (parseInt(item.maxStock ?? 0, 10)) - (parseInt(item.qty ?? 0, 10)));
                     row.innerHTML = `
-                        <div class="col"><img src="${item.img}" width="40" alt=""></div>
-                        <div class="col"><span>${item.name}</span></div>
-                        <div class="col"><span>${money(item.price)}</span></div>
-                        <div class="col-4">
-                          <button class="btn btn-outline-success btn-sm qty-plus" data-id="${item.product_id}">+</button>
-                          <span class="mx-2">${item.qty}</span>
-                          <button class="btn btn-outline-danger btn-sm qty-minus" data-id="${item.product_id}">-</button>
-                        </div>
-                        <div class="d-flex justify-content-end col">
-                          <button class="btn btn-outline-danger btn-sm remove-item" data-id="${item.product_id}">x</button>
-                        </div>
-                    `;
+        <div class="col"><img src="${item.img}" width="40" alt=""></div>
+        <div class="col">
+          <span>${item.name}</span>
+          <div class="small text-muted">${remaining} left</div>
+        </div>
+        <div class="col"><span>${money(item.price)}</span></div>
+        <div class="col-4">
+          <button class="btn btn-outline-success btn-sm qty-plus" data-id="${item.product_id}">+</button>
+          <span class="mx-2">${item.qty}</span>
+          <button class="btn btn-outline-danger btn-sm qty-minus" data-id="${item.product_id}">-</button>
+        </div>
+        <div class="d-flex justify-content-end col">
+          <button class="btn btn-outline-danger btn-sm remove-item" data-id="${item.product_id}">x</button>
+        </div>
+      `;
                     cartList.appendChild(row);
                 });
 
@@ -256,16 +268,25 @@
                 });
             }
 
-            // Add product (stores product_id)
+            // Add product (stores product_id) — with stock guard
             document.querySelectorAll(".add-to-cart").forEach(btn => {
                 btn.addEventListener("click", function() {
-                    const productId = this.dataset.productId || this.dataset.id; // support either
+                    const productId = this.dataset.productId || this.dataset.id;
                     const name  = this.dataset.name;
                     const price = parseFloat(this.dataset.price);
                     const img   = this.dataset.img || '';
+                    const maxStock = parseInt(this.dataset.stock || '0', 10);
 
                     if (!productId) {
-                        alert('Missing product_id on Add button. Add data-product-id to the button.');
+                        alert('Missing product_id on Add button. Add data-product-id to the card.');
+                        return;
+                    }
+                    // hard block if no stock
+                    if (maxStock <= 0) { alert('Out of stock'); return; }
+
+                    const current = cart[productId]?.qty || 0;
+                    if (maxStock > 0 && current >= maxStock) {
+                        alert('No more stock for this product.');
                         return;
                     }
 
@@ -277,25 +298,36 @@
                             name,
                             price,
                             img,
-                            qty: 1
+                            qty: 1,
+                            maxStock: maxStock
                         };
                     }
+                    // keep maxStock synced if DOM changed
+                    cart[productId].maxStock = maxStock;
                     updateCart();
                 });
             });
 
-            // Cart actions by product_id
+            // Cart actions — clamp to stock
             cartList.addEventListener("click", function(e) {
                 const id = e.target.dataset.id;
                 if (!id) return;
 
                 if (e.target.classList.contains("qty-plus")) {
+                    const maxStock = parseInt(cart[id]?.maxStock ?? 0, 10);
+                    const qty = parseInt(cart[id]?.qty ?? 0, 10);
+                    if (maxStock > 0 && qty >= maxStock) {
+                        alert('No more stock for this product.');
+                        return;
+                    }
                     if (cart[id]) cart[id].qty += 1;
+
                 } else if (e.target.classList.contains("qty-minus")) {
                     if (cart[id]) {
                         cart[id].qty -= 1;
                         if (cart[id].qty <= 0) delete cart[id];
                     }
+
                 } else if (e.target.classList.contains("remove-item")) {
                     delete cart[id];
                 }
@@ -308,34 +340,52 @@
                 cancelBtn.addEventListener("click", function() {
                     if (confirm("Are you sure you want to clear your cart?")) {
                         cart = {};
-                        saveCart();
-                        updateCart();
                         localStorage.removeItem(cartKey);
+                        updateCart();
                     }
                 });
             }
 
-            // Filters
+            // Filters — persist choice
             document.querySelectorAll(".filter-btn").forEach(btn => {
+                // restore active state
+                if (btn.dataset.category === currentCategory) btn.classList.add('active');
+
                 btn.addEventListener("click", function() {
                     document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
                     this.classList.add("active");
                     currentCategory = this.dataset.category || 'all';
+                    localStorage.setItem(stateKey, JSON.stringify({ category: currentCategory, search: currentSearch }));
                     filterProducts();
                 });
             });
 
-            // Search
+            // Search — debounced + persist
             const searchInput = document.getElementById("searchInput");
             if (searchInput) {
+                if (currentSearch) searchInput.value = currentSearch;
+                let t;
                 searchInput.addEventListener("input", function() {
-                    currentSearch = this.value.toLowerCase().trim();
-                    filterProducts();
+                    clearTimeout(t);
+                    const val = this.value.toLowerCase().trim();
+                    t = setTimeout(() => {
+                        currentSearch = val;
+                        localStorage.setItem(stateKey, JSON.stringify({ category: currentCategory, search: currentSearch }));
+                        filterProducts();
+                    }, 200);
                 });
             }
 
-            // init
+            // init render
+            filterProducts();
+            // ensure each cart item has maxStock from DOM (helps when coming from previous session)
+            for (const [pid, item] of Object.entries(cart)) {
+                const el = document.querySelector(`.product-card[data-product-id="${pid}"]`);
+                const maxStock = parseInt(el?.dataset.stock || item.maxStock || '0', 10);
+                item.maxStock = maxStock;
+            }
             updateCart();
         });
     </script>
+
 @endsection
