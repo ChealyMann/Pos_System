@@ -11,6 +11,17 @@
             <h3 class="fw-bold mb-0">Add Supplier</h3>
         </div>
 
+        {{-- Display validation errors --}}
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         {{-- Supplier Create Form --}}
         <form action="{{ route('supplier.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -32,19 +43,6 @@
                     <input type="text" name="phone_number" class="form-control bg-white" required />
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Gender</label>
-                    <div class="d-flex align-items-center gap-4 mt-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="gender" value="Male" checked>
-                            <label class="form-check-label">Male</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="gender" value="Female">
-                            <label class="form-check-label">Female</label>
-                        </div>
-                    </div>
-                </div>
                 <div class="col-md-6 mb-3 d-flex align-items-center">
                     <div>
                         <label class="form-label fw-bold">Image</label>

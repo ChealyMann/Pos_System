@@ -17,10 +17,7 @@ return new class extends Migration
             $table->decimal('avg_cost', 10, 2);
             $table->integer('total_qty_in_stock')->default(0);
 
-            // Foreign key constraint
-            $table->foreign('product_id')
-                ->references('product_id')->on('products') // assumes your products table PK is product_id
-                ->onDelete('cascade'); // delete stock if product is deleted
+            // Foreign key constraint will be added later after products table is created
         });
     }
 

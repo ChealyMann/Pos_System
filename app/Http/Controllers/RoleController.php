@@ -3,62 +3,56 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Role;
 
 class RoleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
-        return view('role.index');
+        $roles = Role::all();
+        return view('role.index' , compact('roles'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('role.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'role_name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'required|string|in:active,inactive',
+        ]);
+        // dd($request->all());
+        Role::create([
+            'role_name' => $request->role_name,
+            'description' => $request->description,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('role.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'role_name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'required|string|in:active,inactive',
+        ]);
+
+        $role = Role::findOrFail($id);
+
+        $role->update([
+            'role_name' => $request->role_name,
+            'description' => $request->description,
+            'status' => $request->status,
+        ]);
+
+        return redirect()->route('role.index')->with('success', 'Role updated successfully!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        $role = Role::findOrFail($id);
+        $role->delete();
+        return redirect()->route('role.index')->with('success', 'Role deleted successfully!');
     }
 }

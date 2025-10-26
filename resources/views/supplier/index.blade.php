@@ -17,7 +17,7 @@
                 @foreach($suppliers as $supplier)
                     <div class="col-xl-4 col-lg-6 col-md-6">
                         <div class="user-card d-flex p-3 bg-white rounded-3 shadow-sm align-items-center" style="gap:16px;">
-                            <img src="{{ asset('storage/'. $supplier->image) }}" alt="Supplier" class="rounded-3"
+                            <img src="{{ asset('assets/image/'. $supplier->image) }}" alt="Supplier" class="rounded-3"
                                 style="width:90px; height:90px; object-fit:cover;">
                             <div class="flex-grow-1">
                                 <div class="small text-muted mb-1">#{{ $supplier->supplier_code }}</div>

@@ -1,139 +1,137 @@
 <?php
 
-namespace App\Http\Controllers;
+    namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Supplier;
-use Illuminate\Support\Facades\Storage;
+    use App\Models\Supplier;
+    use Illuminate\Http\Request;
+    use Illuminate\Support\Facades\Auth;
 
-class SupplierController extends Controller
-{
-    /**
-     * Display a listing of the suppliers.
-     */
-    public function index()
+    class SupplierController extends Controller
     {
-        $suppliers = Supplier::all();
-        return view('supplier.index', compact('suppliers'));
-    }
-
-    /**
-     * Show the form for creating a new supplier.
-     */
-    public function create()
-    {
-        return view('supplier.create');
-    }
-
-    /**
-     * Store a newly created supplier in storage.
-     */
-    public function store(Request $request)
-    {
-        $userId = 2;
-
-        $request->validate([
-            'supplier_code'   => 'required|unique:suppliers,supplier_code',
-            'supplier_name'   => 'required|string|max:255',
-            'email'           => 'required|email|unique:suppliers,email',
-            'phone_number'    => 'required|string|max:20',
-            'gender'          => 'required|string',
-            'image'           => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'status'          => 'nullable|string|max:50',
-        ]);
-
-        $supplier = new Supplier();
-
-        $supplier->supplier_code = $request->supplier_code;
-        $supplier->supplier_name = $request->supplier_name;
-        $supplier->email         = $request->email;
-        $supplier->phone_number  = $request->phone_number;
-        $supplier->gender        = $request->gender;
-        $supplier->created_by    = $userId;
-        $supplier->created_at    = $request->input('created_at', now());
-        $supplier->status        = $request->input('status', 'Active'); // match enum case
-
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('suppliers', 'public');
-            $supplier->image = $path;
+        /**
+         * Display a listing of suppliers.
+         */
+        public function index()
+        {
+            $suppliers = Supplier::all();
+            return view('supplier.index', compact('suppliers'));
         }
-        $supplier->save();
 
-        return redirect()->route('supplier.index')->with('success', 'Supplier created successfully!');
-    }
+        /**
+         * Show the form for creating a new supplier.
+         */
+        public function create()
+        {
+            return view('supplier.create');
+        }
 
+        /**
+         * Store a newly created supplier in storage.
+         */
+        public function store(Request $request)
+        {
+            // Validate the request
+            $validated = $request->validate([
+                'supplier_code' => 'required|string|max:50|unique:suppliers,supplier_code',
+                'supplier_name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:suppliers,email',
+                'phone_number' => 'required|string|max:20',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'status' => 'required|in:Active,Inactive',
+            ]);
 
+            // Handle image upload to public/assets/image/
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
 
-    /**
-     * Display the specified supplier.
-     */
-    public function show($id)
-    {
-        $supplier = Supplier::findOrFail($id);
-        return view('supplier.show', compact('supplier'));
-    }
-
-    /**
-     * Show the form for editing the specified supplier.
-     */
-    public function edit($id)
-    {
-        $supplier = Supplier::findOrFail($id);
-        return view('supplier.edit', compact('supplier'));
-    }
-
-    /**
-     * Update the specified supplier in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        $supplier = Supplier::findOrFail($id);
-
-        $request->validate([
-            'supplier_code'   => 'required|string|max:100|unique:suppliers,supplier_code,' . $id . ',supplier_id',
-            'supplier_name'   => 'required|string|max:255',
-            'email'           => 'required|email|unique:suppliers,email,' . $id . ',supplier_id',
-            'phone_number'    => 'required|string|max:20',
-            'gender'          => 'required|string',
-            'image'           => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'status'          => 'nullable|string|max:50',
-        ]);
-
-        $supplier->supplier_code = $request->supplier_code;
-        $supplier->supplier_name = $request->supplier_name;
-        $supplier->email         = $request->email;
-        $supplier->phone_number  = $request->phone_number;
-        $supplier->gender        = $request->gender;
-        $supplier->status        = $request->input('status', $supplier->status);
-
-        if ($request->hasFile('image')) {
-            if ($supplier->image && Storage::disk('public')->exists($supplier->image)) {
-                Storage::disk('public')->delete($supplier->image);
+                // Move to public/assets/image/
+                $image->move(public_path('assets/image'), $imageName);
+                $imagePath = $imageName;
             }
 
-            $path = $request->file('image')->store('suppliers', 'public');
-            $supplier->image = $path;
+            // Create the supplier
+            Supplier::create([
+                'supplier_code' => $validated['supplier_code'],
+                'supplier_name' => $validated['supplier_name'],
+                'email' => $validated['email'],
+                'phone_number' => $validated['phone_number'],
+                'image' => $imagePath,
+                'status' => $validated['status'],
+                'created_by' => Auth::id() ?? null,
+            ]);
+
+            return redirect()->route('supplier.index')
+                ->with('success', 'Supplier created successfully!');
         }
 
-        $supplier->save();
-
-        return redirect()->route('supplier.index')->with('success', 'Supplier updated successfully!');
-    }
-
-    /**
-     * Remove the specified supplier from storage.
-     */
-    public function destroy($id)
-    {
-        $supplier = Supplier::findOrFail($id);
-
-        // Delete associated image
-        if ($supplier->image && Storage::disk('public')->exists($supplier->image)) {
-            Storage::disk('public')->delete($supplier->image);
+        /**
+         * Display the specified supplier.
+         */
+        public function show(Supplier $supplier)
+        {
+            return view('supplier.show', compact('supplier'));
         }
 
-        $supplier->delete();
+        /**
+         * Show the form for editing the specified supplier.
+         */
+        public function edit(Supplier $supplier)
+        {
+            return view('supplier.edit', compact('supplier'));
+        }
 
-        return redirect()->route('supplier.index')->with('success', 'Supplier deleted successfully!');
+        /**
+         * Update the specified supplier in storage.
+         */
+        public function update(Request $request, Supplier $supplier)
+        {
+            // Validate the request
+            $validated = $request->validate([
+                'supplier_code' => 'required|string|max:50|unique:suppliers,supplier_code,' . $supplier->supplier_id . ',supplier_id',
+                'supplier_name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:suppliers,email,' . $supplier->supplier_id . ',supplier_id',
+                'phone_number' => 'required|string|max:20',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'status' => 'required|in:Active,Inactive',
+            ]);
+
+            // Handle image upload to public/assets/image/
+            if ($request->hasFile('image')) {
+                // Delete old image if exists
+                if ($supplier->image && file_exists(public_path($supplier->image))) {
+                    unlink(public_path($supplier->image));
+                }
+
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+
+                // Move to public/assets/image/
+                $image->move(public_path('assets/image'), $imageName);
+                $validated['image'] = $imageName;
+            }
+
+            // Update the supplier
+            $supplier->update($validated);
+
+            return redirect()->route('supplier.index')
+                ->with('success', 'Supplier updated successfully!');
+        }
+
+        /**
+         * Remove the specified supplier from storage.
+         */
+        public function destroy(Supplier $supplier)
+        {
+            // Delete image if exists
+            if ($supplier->image && file_exists(public_path($supplier->image))) {
+                unlink(public_path($supplier->image));
+            }
+
+            $supplier->delete();
+
+            return redirect()->route('supplier.index')
+                ->with('success', 'Supplier deleted successfully!');
+        }
     }
-}

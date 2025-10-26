@@ -22,7 +22,7 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Name</label>
-                        <input type="text" class="form-control bg-white" name="name" value="{{ old('name', $supplier->supplier_name) }}" />
+                        <input type="text" class="form-control bg-white" name="supplier_name" value="{{ old('supplier_name', $supplier->supplier_name) }}" />
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Email</label>
@@ -30,28 +30,15 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Phone</label>
-                        <input type="text" class="form-control bg-white" name="phone" value="{{ old('phone', $supplier->phone_number) }}" />
+                        <input type="text" class="form-control bg-white" name="phone_number" value="{{ old('phone_number', $supplier->phone_number) }}" />
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Gender</label>
-                        <div class="d-flex align-items-center gap-4 mt-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="gender" id="male" value="male" {{$supplier->gender == 'male' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="male">Male</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="gender" id="female" value="female" {{$supplier->gender == 'female' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="female">Female</label>
-                            </div>
-                        </div>
-                    </div>
                     <div class="col-md-6 mb-3 d-flex align-items-center">
                         <div>
                             <label class="form-label fw-bold">Image</label>
                             <div class="d-flex align-items-center mt-2">
                                 @if($supplier->image)
-                                <img src="{{ asset('storage/' . $supplier->image) }}" alt="Supplier" class="rounded-circle"
+                                <img src="{{ asset('assets/image/' . $supplier->image) }}" alt="Supplier" class="rounded-circle"
                                      style="width:70px; height:70px; object-fit:cover; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
                                 @endif
                                 <input type="file" class="form-control ms-3" name="image" style="max-width:220px;">
@@ -59,11 +46,11 @@
                         </div>
                     </div>
                         <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Status</label>
-                        <select name="status" class="form-control bg-white">
-                            <option value="Active" {{$supplier->status == 'active'? 'selected' : ''}} >Active</option>
-                            <option value="Inactive" {{$supplier->status == 'inactive'? 'selected' : ''}}>Inactive</option>
-                        </select>
+                            <label class="form-label fw-bold">Status</label>
+                            <select name="status" class="form-control bg-white">
+                                <option value="Active" {{ (isset($supplier) && $supplier->status == 'Active') || old('status') == 'Active' ? 'selected' : '' }}>Active</option>
+                                <option value="Inactive" {{ (isset($supplier) && $supplier->status == 'Inactive') || old('status') == 'Inactive' ? 'selected' : '' }}>Inactive</option>
+                            </select>
                     </div>
                 </div>
 

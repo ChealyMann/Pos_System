@@ -17,13 +17,12 @@ class Supplier extends Model
         'supplier_name',
         'email',
         'phone_number',
-        'gender',
         'image',
         'created_by',
         'address',
         'status',
     ];
 
-    public $timestamps = false; // Let Laravel manage created_at & updated_at
+    public $timestamps = false;
 
 }
