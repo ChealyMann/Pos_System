@@ -22,6 +22,8 @@
                      alt="{{ $user->name }}">
 
                 <strong>{{ $user->user_name }}</strong>
+
+
             @endif
         </div>
     </div>

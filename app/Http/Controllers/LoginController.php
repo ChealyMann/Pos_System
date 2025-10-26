@@ -9,7 +9,7 @@
 
     class LoginController extends Controller
     {
-        public function __invoke(Request $request): RedirectResponse
+        public function login(Request $request): RedirectResponse
         {
             $request->validate([
                 'user_name' => ['required', 'string'],
