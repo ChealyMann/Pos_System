@@ -1,54 +1,91 @@
-
 @extends('layout.master')
 @section('title', 'Product Detail')
 
 @section('content')
-<div class="col-lg-10 col-md-10 px-5 py-4" style="background:#dbdbdb; min-height:100vh;">
-    <div class="bg-light rounded-3 p-5" style="min-height:80vh;">
-        <h2 class="fw-bold mb-4">Product Detail</h2>
-        <div class="row mb-4 align-items-center">
-            <div class="col-md-4 text-center">
-                <img src="{{ asset('assets/image/image_2025-06-07_15-58-43.png') }}" alt="Product" class="rounded"
-                    style="width:320px; height:320px; object-fit:cover; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-            </div>
-            <div class="col-md-8">
-                <div class="mb-2 text-muted" style="font-size:1.1rem;">#C4530321</div>
-                <h3 class="fw-bold mb-2" style="font-size:2rem;">Coca Cola 330ml</h3>
-                <div class="mb-1" style="font-size:1.15rem;">Price: <span class="fw-bold">$1.50</span></div>
-                <div class="mb-1" style="font-size:1.15rem;">In Stock: <span class="fw-bold">1020</span></div>
-                <div class="mb-1" style="font-size:1.15rem;">Minimum Stock Level: <span class="fw-bold">50</span></div>
-                <div class="mb-3" style="font-size:1.15rem;">Country: <span class="fw-bold">Cambodia</span></div>
-                <div class="mb-3">
-                    <span class="badge"
-                        style="background:#18a05e; color:#fff; font-size:1.1rem; border-radius:24px; padding:10px 40px;">Active</span>
+    <div class="col-lg-10 col-md-10 px-4 py-5" style="background: #f8f9fa; min-height: 100vh;">
+        <div class="bg-white rounded-4 shadow-sm p-5" style="min-height: 80vh;">
+            <h1 class="fw-bold mb-5 text-center text-md-start">Product Detail</h1>
+
+            <div class="row g-5">
+                <!-- Product Image -->
+                <div class="col-md-5 col-lg-4 text-center">
+                    <div class="position-relative d-inline-block">
+                        <img src="{{ asset('assets/image/' . $product->image) }}"
+                             alt="{{ $product->product_name }}"
+                             class="img-fluid rounded-3 shadow"
+                             style="max-width: 100%; height: auto; max-height: 400px; object-fit: contain; border: 1px solid #e9ecef;">
+                    </div>
+                </div>
+
+                <!-- Product Info -->
+                <div class="col-md-7 col-lg-8">
+                    <div class="mb-3">
+                        <span class="badge bg-secondary px-3 py-2 rounded-pill">#{{ $product->barcode }}</span>
+                    </div>
+
+                    <h2 class="fw-bold mb-3">{{ $product->product_name }}</h2>
+
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="display-6 fw-bold text-success me-3">${{ number_format($product->price, 2) }}</span>
+                        <span class="badge rounded-pill"
+                              style="background: {{ $product->status == 'active' ? '#d1e7dd' : '#f8d7da' }}; color: {{ $product->status == 'active' ? '#0f5132' : '#842029' }};">
+                        {{ ucfirst($product->status) }}
+                    </span>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between border-bottom pb-2">
+                                <span class="text-muted">In Stock</span>
+                                <span class="fw-semibold">{{ $product->stock->total_qty_in_stock ?? 0 }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between border-bottom pb-2">
+                                <span class="text-muted">Min. Stock Level</span>
+                                <span class="fw-semibold">{{ $product->min_stock }}</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between border-bottom pb-2">
+                                <span class="text-muted">Country</span>
+                                <span class="fw-semibold">{{ $product->country_name ?? '—' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($product->description)
+                        <div class="mb-4">
+                            <h5 class="fw-semibold mb-2">Description</h5>
+                            <p class="text-muted mb-0" style="line-height: 1.6;">{{ $product->description }}</p>
+                        </div>
+                    @endif
+
+                    <!-- Metadata Section -->
+                    <div class="bg-light rounded-3 p-4 mt-4">
+                        <h6 class="fw-bold text-uppercase text-muted mb-3">Product Information</h6>
+                        <div class="row text-center text-md-start">
+                            <div class="col-md-3 mb-2 mb-md-0">
+                                <small class="text-muted d-block">Created By</small>
+                                <strong>{{ $product->created_by_name ?? '—' }}</strong>
+                            </div>
+                            <div class="col-md-3 mb-2 mb-md-0">
+                                <small class="text-muted d-block">Created At</small>
+                                <strong>{{ \Carbon\Carbon::parse($product->created_at)->format('d M Y, h:i A') }}
+                                </strong>
+                            </div>
+                            <div class="col-md-3 mb-2 mb-md-0">
+                                <small class="text-muted d-block">Updated By</small>
+                                <strong>{{ $product->updated_by ?? '—' }}</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Updated At</small>
+                                <strong>{{ $product->updated_at ? $product->updated_at->format('d M Y') : '—' }}</strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="mb-4" style="font-size:1.15rem; color:#444;">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-            dolore magna aliqua. Proin tortor purus platea sit eu id nisi litora libero. Neque vulputate consequat ac
-            amet augue blandit maximus aliquet congue.
-        </div>
-        <div class="border-top border-bottom py-3 mb-2" style="border-style:dashed !important;">
-            <div class="row text-center fw-bold" style="font-size:1.05rem;">
-                <div class="col">Create By</div>
-                <div class="col">Create At</div>
-                <div class="col">Update By</div>
-                <div class="col">Update At</div>
-            </div>
-            <div class="row text-center" style="font-size:1.05rem;">
-                <div class="col">Bory</div>
-                <div class="col">09 September 2025</div>
-                <div class="col">Yury</div>
-                <div class="col">30 September 2025</div>
-            </div>
-        </div>
     </div>
-</div>
-</div>
-</div>
-</body>
-
-</html>
 @endsection
-

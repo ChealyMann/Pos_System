@@ -30,18 +30,7 @@ return new class extends Migration
             // Laravel default timestamps (created_at, updated_at)
             $table->timestamps();
 
-            // Foreign key constraints
-            $table->foreign('purchase_id')
-                ->references('purchase_id')->on('purchases')
-                ->onDelete('cascade');
-
-            $table->foreign('product_id')
-                ->references('product_id')->on('products')
-                ->onDelete('cascade');
-
-            $table->foreign('created_by')
-                ->references('user_id')->on('users')
-                ->onDelete('cascade');
+            // Foreign key constraints will be added later after all tables are created
         });
 
 

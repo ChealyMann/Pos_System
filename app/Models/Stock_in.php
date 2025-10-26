@@ -20,4 +20,9 @@ class Stock_in extends Model
         'qty_in_stock',
         'stock_in_date'
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'product_id');
+    }
 }

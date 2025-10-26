@@ -2,51 +2,39 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Sale;
-use App\Models\Customer;
 use App\Models\Sale_item;
+use App\Models\User;
 
 class SaleController extends Controller
 {
     public function index()
     {
-        // $sales = Sale::with('customer')->get();
-        return view('sale.index');
+        $sales = DB::table('sales as s')
+            ->join('users as u', 's.sale_by', '=', 'u.user_id')
+            ->select(
+                's.sale_id',
+                's.total_amount',
+                's.payment_method',
+                's.status',
+                'u.user_name',
+                's.sale_date'
+            )
+            ->get();
+
+        // Pass the sales collection to the index view
+        return view('sale.index', compact('sales'));
     }
-
-    public function create()
-    {
-        // $customers = Customer::all();
-        // return view('sale.create', compact('customers'));
-    }
-
-    public function store(Request $request)
-    {
-        // $validatedData = $request->validate([
-        //     'customer_id'  => 'required|integer|exists:customers,customer_id',
-        //     'sale_date'    => 'required|date',
-        //     'total_amount' => 'required|numeric',
-        //     'discount'     => 'nullable|numeric',
-        //     'paid_amount'  => 'required|numeric',
-        //     'status'       => 'required|in:active,pending,completed,cancelled',
-        // ]);
-
-        // Sale::create($validatedData);
-
-        // return redirect()->route('sale.index')->with('success', 'Sale created successfully.');
-    }
-
     public function show($id)
     {
-        return view('sale.view_details');
-    }
+        $sale = Sale::findOrFail($id);
+        $saleItems = Sale_item::with('product')
+            ->where('sale_id', $id)
+            ->get();
+        $user = User::where('user_id', $sale->sale_by)->first();
 
-    public function destroy($id)
-    {
-        // $sale = Sale::where('sale_id', $id)->firstOrFail();
-        // $sale->delete();
-
-        // return redirect()->route('sale.index')->with('success', 'Sale deleted successfully.');
+        return view('sale.view_details', compact('sale', 'saleItems', 'user'));
     }
 }

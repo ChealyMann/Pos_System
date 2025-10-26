@@ -25,8 +25,7 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
 
-            //Foreign key constraint (if you have a roles table)
-            $table->foreign('role_id')->references('role_id')->on('roles')->onDelete('cascade');
+            //Foreign key constraint will be added later after roles table is created
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
