@@ -1,0 +1,116 @@
+[33mcommit 7f844609deae1cdbe2090808910ddde2af9293cf[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mChealy[m[33m)[m
+Author: MannChealy <Lychea664@gmail.com>
+Date:   Mon Oct 27 00:33:05 2025 +0700
+
+    error
+
+[33mcommit 62bf89694f2afd0d9b016ba38e307fc1233f74c1[m
+Author: MannChealy <Lychea664@gmail.com>
+Date:   Mon Oct 27 00:26:01 2025 +0700
+
+    complete the sale not yet reduce stock
+
+[33mcommit 616bb19bfbaa0749e099e1aea6f7db947b17b900[m[33m ([m[1;31morigin_new/Chealy[m[33m)[m
+Author: MannChealy <Lychea664@gmail.com>
+Date:   Sun Oct 26 23:39:06 2025 +0700
+
+    add role middleware and organize the route
+
+[33mcommit 12c120f06bc3c14487268326b666612760606924[m
+Merge: 812498b 077be5d
+Author: ChealyMann <Mashacampro@gmail.com>
+Date:   Sun Oct 26 21:28:25 2025 +0700
+
+    Merge pull request #1 from ChealyMann/Rathana
+    
+    Rathana
+
+[33mcommit 077be5d1cfe5c3416742af6729e6902d45737dd6[m[33m ([m[1;31morigin_new/Rathana[m[33m, [m[1;32mRathana[m[33m)[m
+Author: MannChealy <Lychea664@gmail.com>
+Date:   Sun Oct 26 21:12:42 2025 +0700
+
+    commit before push to git
+
+[33mcommit 4f85d0dd249105bebe7c49cb4b96206c3c0b334e[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Tue Sep 30 14:32:26 2025 +0700
+
+    commit V1.0.0.6
+
+[33mcommit 204c56388c0239f4316818d2f6933ad37688fdcb[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Mon Sep 29 23:57:46 2025 +0700
+
+    commit V1.0.0.5
+
+[33mcommit df1068f40455e13dd88852597caf818be75d31cb[m[33m ([m[1;31morigin/Rathana[m[33m)[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Mon Sep 29 02:00:35 2025 +0700
+
+    commit V1.0.0.4
+
+[33mcommit daf1783ca550deb4e4c6c42b870e2f266e760b8a[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Mon Sep 29 01:11:49 2025 +0700
+
+    commit V1.0.0.4
+
+[33mcommit 3a4fbeb5bdfb1ab810517cd91911fe0ddd77c3c8[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Sun Sep 28 22:59:52 2025 +0700
+
+    commit V1.0.0.3
+
+[33mcommit 812498b82986e703930263d6e67e805015e99793[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Mon Sep 22 19:58:15 2025 +0700
+
+    commit V1.0.0.3
+
+[33mcommit 68407280369a955c4e6bb27e84f073a3c6386184[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Mon Sep 22 18:43:45 2025 +0700
+
+    commit V1.0.0.2
+
+[33mcommit 8a679de48af62b37f7c2362f31b4156394fbbc13[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Mon Sep 22 18:21:03 2025 +0700
+
+    Commit V1.0.0.1
+
+[33mcommit 90d3c2555456347754f7163cb7cd7db809c43c40[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Mon Sep 22 18:07:43 2025 +0700
+
+    Commit V1.0.0.0
+
+[33mcommit f0e6366a5b4e8b61f93eb5596e72aff0c018a801[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Tue Sep 16 23:52:43 2025 +0700
+
+    V1.0.0.0
+
+[33mcommit f53e88ed5228be36b314720ac27a05eba208fa9f[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Tue Sep 16 23:42:20 2025 +0700
+
+    First commit
+
+[33mcommit a7e64aff3c37173322804f59358589eb529ba261[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Tue Sep 16 23:18:23 2025 +0700
+
+    Main commit v1.0.0.0
+
+[33mcommit b4df53a4a9da3dccc960064133284b404bf12653[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Tue Sep 16 23:00:38 2025 +0700
+
+    First commit
+
+[33mcommit e7a6805fadeeaa5551b32be41b4ce78e8c570cbd[m
+Author: rathana4530 <jayarakhito@gmail.com>
+Date:   Mon Sep 15 23:02:16 2025 +0700
+
+    First commit
