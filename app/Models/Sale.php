@@ -8,7 +8,14 @@
     {
         protected $table = 'sales';
         protected $primaryKey = 'sale_id';
-        protected $fillable = ['sale_by','sale_date','total_amount','payment_method','status'];
+
+        protected $fillable = [
+            'sale_by',
+            'sale_date',
+            'total_amount',
+            'payment_method',  // <-- add this (exists in DB)
+            'status',
+        ];
 
         public function saleItems()
         {
