@@ -6,7 +6,7 @@
     <div class="row g-0" style="background:#e0e0e0; min-height:100vh;">
         <div class="col-lg-7 col-md-12 p-4">
             <div>
-                <a href="{{url('/')}}" class="btn btn-link fs-2 p-0" style="color:#444;">
+                <a href="{{url('/home')}}" class="btn btn-link fs-2 p-0" style="color:#444;">
                     <i class="bi bi-arrow-left-circle"></i>
                 </a>
             </div>
@@ -115,147 +115,188 @@
     <link rel="stylesheet" href="../assets/css/style.css">
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Get cart data from localStorage
-            const cart = JSON.parse(localStorage.getItem('shoppingCart')) || {};
+        document.addEventListener("DOMContentLoaded", function () {
+            const cartKey = 'shoppingCart';
+            const $ = (sel) => document.querySelector(sel);
 
-            // Check if cart is empty
-            if (Object.keys(cart).length === 0) {
-                document.getElementById('cart-items-table').innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center text-muted">Your cart is empty</td>
-            </tr>
-        `;
+            // --- Helpers
+            const fmt = (n) => `$${Number(n || 0).toFixed(2)}`;
+            const num = (x) => parseFloat(String(x).replace(/[^\d.]/g, '')) || 0;
+
+            // --- Load cart
+            const cart = JSON.parse(localStorage.getItem(cartKey) || '{}');
+
+            // If empty cart, show message and stop
+            if (!cart || Object.keys(cart).length === 0) {
+                $('#cart-items-table').innerHTML = `
+      <tr><td colspan="5" class="text-center text-muted">Your cart is empty</td></tr>`;
+                $('#confirm-payment-btn').disabled = true;
                 return;
             }
 
-            // Calculate totals
+            // --- Build rows + subtotal
             let subtotal = 0;
-            let cartItemsHTML = '';
-            let counter = 1;
+            let rows = '';
+            let i = 1;
 
-            // Generate table rows
             Object.values(cart).forEach(item => {
-                const itemSubtotal = item.price * item.qty;
-                subtotal += itemSubtotal;
+                // Expecting: { product_id, name, price, qty }
+                const price = num(item.price);
+                const qty   = parseInt(item.qty, 10) || 0;
+                const line  = price * qty;
+                subtotal   += line;
 
-                cartItemsHTML += `
-            <tr>
-                <td>${counter}</td>
-                <td>${item.name}</td>
-                <td>$${item.price.toFixed(2)}</td>
-                <td>${item.qty}</td>
-                <td>$${itemSubtotal.toFixed(2)}</td>
-            </tr>
-        `;
-                counter++;
+                rows += `
+      <tr>
+        <td>${i++}</td>
+        <td>${item.name ?? '-'}</td>
+        <td>${fmt(price)}</td>
+        <td>${qty}</td>
+        <td>${fmt(line)}</td>
+      </tr>
+    `;
             });
 
-            // Update table
-            document.getElementById('cart-items-table').innerHTML = cartItemsHTML;
+            $('#cart-items-table').innerHTML = rows;
 
-            // Calculate tax and discount
-            const tax = subtotal * 0.1; // 10% tax
-            const discount = subtotal > 20 ? 2 : 0; // $2 discount if subtotal > $20
-            const total = subtotal + tax - discount;
+            // --- Totals (adjust to your rules)
+            const tax      = subtotal * 0.10;         // 10% tax
+            const discount = subtotal > 20 ? 2 : 0;   // flat 2 if > 20
+            const total    = subtotal + tax - discount;
 
-            // Update totals display
-            document.getElementById('subtotal-amount').textContent = `$${subtotal.toFixed(2)}`;
-            document.getElementById('tax-amount').textContent = `$${tax.toFixed(2)}`;
-            document.getElementById('discount-amount').textContent = `$${discount.toFixed(2)}`;
-            document.getElementById('payable-amount').textContent = `$${total.toFixed(2)}`;
-            document.getElementById('credit-amount').textContent = `$${total.toFixed(2)}`;
+            // --- Paint summary
+            $('#subtotal-amount').textContent = fmt(subtotal);
+            $('#tax-amount').textContent      = fmt(tax);
+            $('#discount-amount').textContent = fmt(discount);
+            $('#payable-amount').textContent  = fmt(total);
+            $('#credit-amount').textContent   = fmt(total);
 
-            // Initialize cash input with total amount
-            let currentCashValue = total;
-            document.getElementById('cash-input').value = `$${total.toFixed(2)}`;
+            // --- Cash keypad state - FIX: Start with empty string, not total
+            let cashString = '';
+            const cashInput = $('#cash-input');
+            cashInput.value = '$0.00';
 
-            // Balance calculation
             function updateBalance() {
-                const cash = parseFloat(currentCashValue) || 0;
-                const balance = cash - total;
-                document.getElementById('balance-amount').textContent = `$${balance.toFixed(2)}`;
-            }
+                const cashValue = cashString === '' ? 0 : parseFloat(cashString);
+                const balance = cashValue - total;
+                $('#balance-amount').textContent = fmt(balance);
 
+                // Update cash input display
+                cashInput.value = fmt(cashValue);
+            }
             updateBalance();
 
-            // Cash calculator logic
-            const cashInput = document.getElementById('cash-input');
-
+            // --- Keypad - FIXED LOGIC
             document.querySelectorAll('.row.g-2 .btn-light').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     const action = this.getAttribute('data-action');
-                    const value = this.getAttribute('data-value');
+                    const value  = this.getAttribute('data-value');
 
                     if (action === 'cancel') {
-                        currentCashValue = total; // Reset to payable amount
+                        // Reset to empty
+                        cashString = '';
                     } else if (action === 'backspace') {
-                        let cashStr = currentCashValue.toString();
-                        if (cashStr.length > 1) {
-                            currentCashValue = parseFloat(cashStr.slice(0, -1)) || 0;
-                        } else {
-                            currentCashValue = 0;
-                        }
+                        // Remove last character
+                        cashString = cashString.slice(0, -1);
                     } else if (value) {
-                        if (value === '00') {
-                            currentCashValue = currentCashValue * 100;
-                        } else if (value === '.') {
-                            if (!currentCashValue.toString().includes('.')) {
-                                currentCashValue = currentCashValue + '.';
+                        if (value === '.') {
+                            // Only add decimal if not already present
+                            if (!cashString.includes('.')) {
+                                cashString = (cashString || '0') + '.';
                             }
                         } else {
-                            // Handle number input
-                            if (currentCashValue === total) {
-                                // If starting fresh, replace the default value
-                                currentCashValue = parseFloat(value) || 0;
+                            // Add digit(s)
+                            // Remove leading zeros unless after decimal
+                            if (cashString === '0' && value !== '00') {
+                                cashString = value;
+                            } else if (cashString === '' && value === '00') {
+                                cashString = '0';
                             } else {
-                                currentCashValue = parseFloat(currentCashValue.toString() + value) || 0;
+                                cashString += value;
                             }
                         }
-                    }
-
-                    // Format and display
-                    if (currentCashValue === 0 || isNaN(currentCashValue)) {
-                        cashInput.value = '$0.00';
-                        currentCashValue = 0;
-                    } else {
-                        cashInput.value = `$${parseFloat(currentCashValue).toFixed(2)}`;
                     }
 
                     updateBalance();
                 });
             });
 
-            // Confirm payment button
-            document.getElementById('confirm-payment-btn').addEventListener('click', function() {
-                const balance = parseFloat(document.getElementById('balance-amount').textContent.replace('$', ''));
+            // --- Confirm Payment → POST to backend
+            const csrfTag = document.querySelector('meta[name="csrf-token"]');
+            const csrf = csrfTag ? csrfTag.getAttribute('content') : '';
+
+            $('#confirm-payment-btn').addEventListener('click', async function () {
+                const cashValue = cashString === '' ? 0 : parseFloat(cashString);
+                const balance = cashValue - total;
 
                 if (balance < 0) {
                     alert('Please enter sufficient cash amount!');
                     return;
                 }
 
-                // Prepare cart data for server
-                const orderData = {
-                    cart_items: cart,
-                    subtotal: subtotal,
-                    tax: tax,
-                    discount: discount,
-                    total: total,
-                    cash_received: parseFloat(currentCashValue),
-                    change: balance
+                // Build items payload (must include product_id!)
+                const items = Object.values(cart).map(it => ({
+                    product_id: it.product_id,
+                    qty: parseInt(it.qty, 10) || 0,
+                    price: num(it.price)
+                }));
+
+                if (items.length === 0) {
+                    alert('Cart empty.');
+                    return;
+                }
+                if (items.some(x => !x.product_id)) {
+                    alert('Some cart items have no product_id. Make sure you store product_id when adding to cart.');
+                    return;
+                }
+
+                const payload = {
+                    payment_method: 'cash',
+                    subtotal,
+                    tax,
+                    discount,
+                    total,
+                    cash_received: cashValue,
+                    change: balance,
+                    items
                 };
 
-                // Send to server (you can implement this part)
-                console.log('Order data:', orderData);
+                // Disable button to prevent double submission
+                this.disabled = true;
+                this.textContent = 'Processing...';
 
-                // Clear cart after successful payment
-                localStorage.removeItem('shoppingCart');
+                try {
+                    const res = await fetch('{{ route('sales.store') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            ...(csrf ? {'X-CSRF-TOKEN': csrf} : {})
+                        },
+                        body: JSON.stringify(payload)
+                    });
 
-                // Redirect to success page or show confirmation
-                alert('Payment confirmed successfully!');
-                window.location.href = '/'; // or redirect to success page
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        console.error('Save failed:', err);
+                        alert('Could not save sale. Please try again.');
+                        this.disabled = false;
+                        this.textContent = 'Confirm Payment';
+                        return;
+                    }
+
+                    const data = await res.json();
+                    localStorage.removeItem(cartKey);
+                    alert('Payment confirmed successfully! Sale #' + (data.sale_id ?? ''));
+                    window.location.href = data.redirect || '/home';
+                } catch (e) {
+                    console.error(e);
+                    alert('Network error. Please try again.');
+                    this.disabled = false;
+                    this.textContent = 'Confirm Payment';
+                }
             });
         });
     </script>
+
 @endsection

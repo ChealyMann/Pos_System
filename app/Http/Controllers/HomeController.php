@@ -18,6 +18,7 @@
             $products = DB::table('products as p')
                 ->join('categories as c', 'c.category_id', '=', 'p.category_id')
                 ->select(
+                    'p.product_id',
                     'p.product_name',
                     'p.price',
                     'p.image',

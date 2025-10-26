@@ -5,7 +5,6 @@
     <!-- Main Content -->
     <div class="col-lg-6 col-md-6 px-3 py-2">
 
-
         <!-- CATEGORY FILTER -->
         <div class="align-items-center justify-content-between category-bar my-3 text-center"
              style="position: sticky; top: 120px; z-index: 99; background: white; padding: 10px 10px;">
@@ -29,11 +28,8 @@
                    style="max-width: 200px;">
         </div>
 
-
-        <!-- SEARCH BAR -->
-        <div class="my-2" style="position: sticky; top: 60px; z-index: 100; background: white; padding: 10px 0;">
-
-        </div>
+        <!-- SEARCH BAR (reserved sticky space) -->
+        <div class="my-2" style="position: sticky; top: 60px; z-index: 100; background: white; padding: 10px 0;"></div>
 
         <!-- PRODUCTS -->
         <div class="row row-cols-2 row-cols-md-4 g-3" id="productList" style="overflow-y: auto; height: 70vh;">
@@ -41,6 +37,7 @@
             @foreach($products as $product)
                 <div class="col mb-4 product-item">
                     <div class="product-card add-to-cart h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white"
+                         data-product-id="{{ $product->product_id }}"   {{-- ✅ critical for cart --}}
                          data-name="{{ $product->product_name }}"
                          data-price="{{ $product->price }}"
                          data-img="{{ asset('assets/image/' . $product->image) }}"
@@ -73,13 +70,12 @@
                                 {{ Str::limit($product->product_name, 30) }}
                             </h6>
 
-                            <!-- Price -->
+                            <!-- Price + Add Icon -->
                             <div class="d-flex align-items-center justify-content-between">
                                 <span class="fs-4 fw-bold text-success mb-0" style="letter-spacing: -0.5px;">
                                     ${{ number_format($product->price, 2) }}
                                 </span>
 
-                                <!-- Add to Cart Icon -->
                                 <div class="rounded-circle d-flex align-items-center justify-content-center"
                                      style="width: 40px; height: 40px; background-color: #0d6efd; transition: all 0.2s ease;"
                                      onmouseover="this.style.backgroundColor='#0b5ed7'; this.style.transform='rotate(12deg) scale(1.1)'"
@@ -107,21 +103,11 @@
                 </div>
             </div>
             <div class="cart-item row">
-                <div class="col">
-                    <p>Image</p>
-                </div>
-                <div class="col">
-                    <p>Name</p>
-                </div>
-                <div class="col">
-                    <p>Price</p>
-                </div>
-                <div class="col-4">
-                    <p>QTY</p>
-                </div>
-                <div class="d-flex justify-content-end col">
-                    <p>Remove</p>
-                </div>
+                <div class="col"><p>Image</p></div>
+                <div class="col"><p>Name</p></div>
+                <div class="col"><p>Price</p></div>
+                <div class="col-4"><p>QTY</p></div>
+                <div class="d-flex justify-content-end col"><p>Remove</p></div>
             </div>
         </div>
 
@@ -137,7 +123,7 @@
                 <h5>Payable Amount: <span id="total" class="float-end">$0.00</span></h5>
                 <div class="d-grid gap-2 mt-3">
                     <button class="btn btn-danger" id="cancelOrder">Cancel Order</button>
-                    <a href="{{url('/cash')}}" class="btn btn-success">Place Order</a>
+                    <a href="{{ url('/cash') }}" class="btn btn-success">Place Order</a>
                 </div>
             </div>
         </div>
@@ -153,78 +139,90 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Load cart from localStorage or initialize empty cart
-            let cart = JSON.parse(localStorage.getItem('shoppingCart')) || {};
-            let cartList = document.getElementById("cartList");
+            const cartKey = 'shoppingCart';
+            let cart = JSON.parse(localStorage.getItem(cartKey)) || {};
+            const cartList = document.getElementById("cartList");
             let currentCategory = "all";
             let currentSearch = "";
 
-            // Save cart to localStorage whenever it changes
-            function saveCart() {
-                localStorage.setItem('shoppingCart', JSON.stringify(cart));
+            // helpers
+            const saveCart = () => localStorage.setItem(cartKey, JSON.stringify(cart));
+            const money = n => `$${Number(n || 0).toFixed(2)}`;
+
+            // Clear legacy cart items without product_id to avoid checkout errors
+            if (Object.values(cart).some(it => !it.product_id)) {
+                console.warn('Clearing legacy cart without product_id.');
+                cart = {};
+                saveCart();
             }
 
             function updateCart() {
                 cartList.innerHTML = "";
                 let subtotal = 0;
+
                 Object.values(cart).forEach(item => {
-                    let row = document.createElement("div");
+                    const line = Number(item.price) * Number(item.qty);
+                    subtotal += line;
+
+                    const row = document.createElement("div");
                     row.className = "cart-item row align-items-center my-2";
                     row.innerHTML = `
-                    <div class="col"><img src="${item.img}" width="40"></div>
-                    <div class="col"><span>${item.name}</span></div>
-                    <div class="col"><span>$${item.price.toFixed(2)}</span></div>
-                    <div class="col-4">
-                        <button class="btn btn-outline-success btn-sm qty-plus" data-name="${item.name}">+</button>
-                        <span class="mx-2">${item.qty}</span>
-                        <button class="btn btn-outline-danger btn-sm qty-minus" data-name="${item.name}">-</button>
-                    </div>
-                    <div class="d-flex justify-content-end col">
-                        <button class="btn btn-outline-danger btn-sm remove-item" data-name="${item.name}">x</button>
-                    </div>
-                `;
+                        <div class="col"><img src="${item.img}" width="40" alt=""></div>
+                        <div class="col"><span>${item.name}</span></div>
+                        <div class="col"><span>${money(item.price)}</span></div>
+                        <div class="col-4">
+                          <button class="btn btn-outline-success btn-sm qty-plus" data-id="${item.product_id}">+</button>
+                          <span class="mx-2">${item.qty}</span>
+                          <button class="btn btn-outline-danger btn-sm qty-minus" data-id="${item.product_id}">-</button>
+                        </div>
+                        <div class="d-flex justify-content-end col">
+                          <button class="btn btn-outline-danger btn-sm remove-item" data-id="${item.product_id}">x</button>
+                        </div>
+                    `;
                     cartList.appendChild(row);
-                    subtotal += item.price * item.qty;
                 });
-                // Totals
-                document.getElementById("subtotal").textContent = `$${subtotal.toFixed(2)}`;
-                let tax = subtotal * 0.1;
-                document.getElementById("tax").textContent = `$${tax.toFixed(2)}`;
-                let discount = subtotal > 20 ? 2 : 0; // example discount
-                document.getElementById("discount").textContent = `$${discount.toFixed(2)}`;
-                document.getElementById("total").textContent = `$${(subtotal + tax - discount).toFixed(2)}`;
 
-                // Save to localStorage after every update
+                const tax = subtotal * 0.10;
+                const discount = subtotal > 20 ? 2 : 0;
+                const total = subtotal + tax - discount;
+
+                document.getElementById("subtotal").textContent = money(subtotal);
+                document.getElementById("tax").textContent      = money(tax);
+                document.getElementById("discount").textContent = money(discount);
+                document.getElementById("total").textContent    = money(total);
+
                 saveCart();
             }
 
             function filterProducts() {
                 document.querySelectorAll(".product-item").forEach(item => {
-                    let product = item.querySelector(".product-card");
-                    let category = product.dataset.category;
-                    let searchText = product.dataset.search;
-
-                    let categoryMatch = currentCategory === "all" || category === currentCategory;
-                    let searchMatch = currentSearch === "" || searchText.includes(currentSearch);
-
-                    if (categoryMatch && searchMatch) {
-                        item.style.display = "block";
-                    } else {
-                        item.style.display = "none";
-                    }
+                    const card = item.querySelector(".product-card");
+                    const category = card.dataset.category;
+                    const searchText = (card.dataset.search || '').toLowerCase();
+                    const categoryMatch = currentCategory === "all" || category === currentCategory;
+                    const searchMatch = currentSearch === "" || searchText.includes(currentSearch);
+                    item.style.display = (categoryMatch && searchMatch) ? "block" : "none";
                 });
             }
 
-            // Add product
-            document.querySelectorAll(".add-to-cart").forEach(product => {
-                product.addEventListener("click", function() {
-                    let name = this.dataset.name;
-                    let price = parseFloat(this.dataset.price);
-                    let img = this.dataset.img;
-                    if (cart[name]) {
-                        cart[name].qty++;
+            // Add product (stores product_id)
+            document.querySelectorAll(".add-to-cart").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const productId = this.dataset.productId || this.dataset.id; // support either
+                    const name  = this.dataset.name;
+                    const price = parseFloat(this.dataset.price);
+                    const img   = this.dataset.img || '';
+
+                    if (!productId) {
+                        alert('Missing product_id on Add button. Add data-product-id to the button.');
+                        return;
+                    }
+
+                    if (cart[productId]) {
+                        cart[productId].qty += 1;
                     } else {
-                        cart[name] = {
+                        cart[productId] = {
+                            product_id: productId,
                             name,
                             price,
                             img,
@@ -235,52 +233,58 @@
                 });
             });
 
-            // Cart actions
+            // Cart actions by product_id
             cartList.addEventListener("click", function(e) {
-                let name = e.target.dataset.name;
+                const id = e.target.dataset.id;
+                if (!id) return;
+
                 if (e.target.classList.contains("qty-plus")) {
-                    cart[name].qty++;
+                    if (cart[id]) cart[id].qty += 1;
                 } else if (e.target.classList.contains("qty-minus")) {
-                    cart[name].qty--;
-                    if (cart[name].qty <= 0) delete cart[name];
+                    if (cart[id]) {
+                        cart[id].qty -= 1;
+                        if (cart[id].qty <= 0) delete cart[id];
+                    }
                 } else if (e.target.classList.contains("remove-item")) {
-                    delete cart[name];
+                    delete cart[id];
                 }
                 updateCart();
             });
 
-            // Cancel order → clear cart
-            document.getElementById("cancelOrder").addEventListener("click", function() {
-                if (confirm("Are you sure you want to clear your cart?")) {
-                    cart = {};
-                    updateCart();
-                    // Also clear from localStorage
-                    localStorage.removeItem('shoppingCart');
-                }
-            });
+            // Clear cart
+            const cancelBtn = document.getElementById("cancelOrder");
+            if (cancelBtn) {
+                cancelBtn.addEventListener("click", function() {
+                    if (confirm("Are you sure you want to clear your cart?")) {
+                        cart = {};
+                        saveCart();
+                        updateCart();
+                        localStorage.removeItem(cartKey);
+                    }
+                });
+            }
 
-            // Filter by category
+            // Filters
             document.querySelectorAll(".filter-btn").forEach(btn => {
                 btn.addEventListener("click", function() {
-                    // Remove active class from all buttons
                     document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-                    // Add active class to clicked button
                     this.classList.add("active");
-
-                    currentCategory = this.dataset.category;
+                    currentCategory = this.dataset.category || 'all';
                     filterProducts();
                 });
             });
 
-            // Search functionality
-            document.getElementById("searchInput").addEventListener("input", function() {
-                currentSearch = this.value.toLowerCase().trim();
-                filterProducts();
-            });
+            // Search
+            const searchInput = document.getElementById("searchInput");
+            if (searchInput) {
+                searchInput.addEventListener("input", function() {
+                    currentSearch = this.value.toLowerCase().trim();
+                    filterProducts();
+                });
+            }
 
-            // Initialize cart display on page load
+            // init
             updateCart();
         });
     </script>
-
 @endsection
