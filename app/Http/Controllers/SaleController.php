@@ -2,12 +2,15 @@
 
     namespace App\Http\Controllers;
 
-    use Illuminate\Support\Facades\DB;
     use Illuminate\Http\Request;
+    use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Carbon;
+    use Illuminate\Validation\ValidationException;
+
     use App\Models\Sale;
-    use App\Models\Sale_item;         // <-- keep consistent with your model name
+    use App\Models\Sale_item;
     use App\Models\User;
-    use Illuminate\Support\Carbon;     // <-- add this
+    use App\Models\Stock;
 
     class SaleController extends Controller
     {
@@ -15,14 +18,7 @@
         {
             $sales = DB::table('sales as s')
                 ->join('users as u', 's.sale_by', '=', 'u.user_id')
-                ->select(
-                    's.sale_id',
-                    's.total_amount',
-                    's.payment_method',
-                    's.status',
-                    'u.user_name',
-                    's.sale_date'
-                )
+                ->select('s.sale_id','s.total_amount','s.payment_method','s.status','u.user_name','s.sale_date')
                 ->orderByDesc('s.sale_id')
                 ->get();
 
@@ -32,11 +28,7 @@
         public function show($id)
         {
             $sale = Sale::findOrFail($id);
-
-            $saleItems = Sale_item::with('product')
-                ->where('sale_id', $id)
-                ->get();
-
+            $saleItems = Sale_item::with('product')->where('sale_id', $id)->get();
             $user = User::where('user_id', $sale->sale_by)->first();
 
             return view('sale.view_details', compact('sale', 'saleItems', 'user'));
@@ -58,44 +50,72 @@
                 'items.*.price'        => 'required|numeric|min:0',
             ]);
 
+            // IMPORTANT: your users table uses user_id as PK, not id
             $user = auth()->user();
-            $userId = $user->user_id ?? $user->id; // support either pk
+            if (!$user) {
+                return response()->json(['ok'=>false,'message'=>'Unauthenticated'], 401);
+            }
+            $userId = $user->user_id ?? $user->id;
 
-            $sale = DB::transaction(function () use ($data, $userId) {
+            try {
+                $sale = DB::transaction(function () use ($data, $userId) {
 
-                // 1) Create sale (matches your `sales` table)
-                $sale = Sale::create([
-                    'sale_by'        => $userId,
-                    'total_amount'   => $data['total'],
-                    'payment_method' => $data['payment_method'],
-                    'status'         => 'paid',
-                    'sale_date'      => Carbon::today()->toDateString(),
-                ]);
-
-                // 2) Insert items (matches your `sale_items` table columns)
-                foreach ($data['items'] as $it) {
-                    $lineTotal = round($it['price'] * $it['qty'], 2);
-
-                    Sale_item::create([
-                        'sale_id'     => $sale->sale_id,
-                        'product_id'  => $it['product_id'],
-                        'qty'         => (int)$it['qty'],        // <-- use `qty`
-                        'unit_price'  => (float)$it['price'],
-                        'total_price' => $lineTotal,
+                    $sale = Sale::create([
+                        'sale_by'        => $userId,
+                        'total_amount'   => $data['total'],
+                        'payment_method' => $data['payment_method'],
+                        'status'         => 'paid',
+                        'sale_date'      => Carbon::today()->toDateString(),
                     ]);
 
-                    // Optional: decrement stock if you have a Stock model
-                    // \App\Models\Stock::where('product_id', $it['product_id'])
-                    //     ->decrement('total_qty_in_stock', (int)$it['qty']);
-                }
+                    foreach ($data['items'] as $it) {
+                        $pid   = (int)$it['product_id'];
+                        $qty   = (int)$it['qty'];
+                        $price = (float)$it['price'];
 
-                return $sale;
-            });
+                        Sale_item::create([
+                            'sale_id'     => $sale->sale_id,
+                            'product_id'  => $pid,
+                            'qty'         => $qty, // your column name is `qty`
+                            'unit_price'  => $price,
+                            'total_price' => round($price * $qty, 2),
+                        ]);
 
-            return response()->json([
-                'ok'       => true,
-                'sale_id'  => $sale->sale_id,
-                'redirect' => url('/home'),
-            ]);
+                        // Atomic stock decrement (prevents oversell)
+                        $affected = DB::table('stocks')
+                            ->where('product_id', $pid)
+                            ->where('total_qty_in_stock', '>=', $qty)
+                            ->decrement('total_qty_in_stock', $qty);
+
+                        if ($affected === 0) {
+                            throw ValidationException::withMessages([
+                                'items' => ["Insufficient stock for product ID {$pid}."],
+                            ]);
+                        }
+                    }
+
+                    return $sale;
+                });
+
+                return response()->json([
+                    'ok'       => true,
+                    'sale_id'  => $sale->sale_id,
+                    'redirect' => url('/home'),
+                ]);
+
+            } catch (ValidationException $ve) {
+                return response()->json([
+                    'ok'     => false,
+                    'message'=> $ve->getMessage(),
+                    'errors' => $ve->errors(),
+                ], 422);
+
+            } catch (\Throwable $e) {
+                return response()->json([
+                    'ok'      => false,
+                    'message' => 'Server error saving sale.',
+                    'detail'  => config('app.debug') ? $e->getMessage() : null,  // <-- fixed
+                ], 500);
+            }
         }
     }

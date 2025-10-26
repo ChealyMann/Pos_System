@@ -9,14 +9,7 @@
     {
         protected $table = 'sale_items';
         protected $primaryKey = 'sale_item_id';
-
-        protected $fillable = [
-            'sale_id',
-            'product_id',
-            'qty',          // <-- match the table column name
-            'unit_price',
-            'total_price',
-        ];
+        protected $fillable = ['sale_id','product_id','qty','unit_price','total_price'];
 
         public function product()
         {
