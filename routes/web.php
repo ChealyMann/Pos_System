@@ -103,4 +103,7 @@
         Route::resource('/home', HomeController::class)->names('home');
         Route::resource('/cash', CashController::class);
         Route::resource('/sale', SaleController::class);
+        Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
     });
+
+

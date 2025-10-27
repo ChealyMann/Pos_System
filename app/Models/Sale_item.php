@@ -1,24 +1,25 @@
 <?php
 
-namespace App\Models;
+    namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Product;
+    use Illuminate\Database\Eloquent\Model;
+    use App\Models\Product;
 
-class Sale_item extends Model
-{
-    protected $table = 'sale_items';
-    protected $primaryKey = 'sale_item_id';
-    protected $fillable = [
-        'sale_id',
-        'product_id',
-        'quantity',
-        'unit_price',
-        'total_price',
-    ];
-
-    public function product()
+    class Sale_item extends Model
     {
-        return $this->belongsTo(Product::class, 'product_id', 'product_id');
+        protected $table = 'sale_items';
+        protected $primaryKey = 'sale_item_id';
+
+        protected $fillable = [
+            'sale_id',
+            'product_id',
+            'qty',          // <-- match the table column name
+            'unit_price',
+            'total_price',
+        ];
+
+        public function product()
+        {
+            return $this->belongsTo(Product::class, 'product_id', 'product_id');
+        }
     }
-}

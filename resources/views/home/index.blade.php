@@ -5,7 +5,6 @@
     <!-- Main Content -->
     <div class="col-lg-6 col-md-6 px-3 py-2">
 
-
         <!-- CATEGORY FILTER -->
         <div class="align-items-center justify-content-between category-bar my-3 text-center"
              style="position: sticky; top: 120px; z-index: 99; background: white; padding: 10px 10px;">
@@ -29,11 +28,8 @@
                    style="max-width: 200px;">
         </div>
 
-
-        <!-- SEARCH BAR -->
-        <div class="my-2" style="position: sticky; top: 60px; z-index: 100; background: white; padding: 10px 0;">
-
-        </div>
+        <!-- SEARCH BAR (reserved sticky space) -->
+        <div class="my-2" style="position: sticky; top: 60px; z-index: 100; background: white; padding: 10px 0;"></div>
 
         <!-- PRODUCTS -->
         <div class="row row-cols-2 row-cols-md-4 g-3" id="productList" style="overflow-y: auto; height: 70vh;">
@@ -41,8 +37,10 @@
             @foreach($products as $product)
                 <div class="col mb-4 product-item">
                     <div class="product-card add-to-cart h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white"
+                         data-product-id="{{ $product->product_id }}"
                          data-name="{{ $product->product_name }}"
                          data-price="{{ $product->price }}"
+                         data-stock="{{ $product->total_qty_in_stock ?? 0 }}"
                          data-img="{{ asset('assets/image/' . $product->image) }}"
                          data-category="{{ strtolower(str_replace(' ', '-', $product->category_name)) }}"
                          data-search="{{ strtolower($product->product_name . ' ' . $product->category_name) }}"
@@ -60,10 +58,23 @@
                                  onmouseout="this.style.transform='scale(1)'">
 
                             <!-- Category Badge -->
-                            <span class="position-absolute top-0 end-0 m-3 badge rounded-pill px-3 py-2"
-                                  style="background: rgba(13, 110, 253, 0.95); font-size: 0.75rem; font-weight: 600; backdrop-filter: blur(10px);">
-                                {{ $product->category_name }}
-                            </span>
+{{--                            <span class="position-absolute top-0 end-0 m-3 badge rounded-pill px-3 py-2"--}}
+{{--                                  style="background: rgba(13, 110, 253, 0.95); font-size: 0.75rem; font-weight: 600; backdrop-filter: blur(10px);">--}}
+{{--                                {{ $product->category_name }}--}}
+{{--                            </span>--}}
+
+                            <!-- Stock Badge (Low Stock Warning) -->
+                            @if(($product->total_qty_in_stock ?? 0) <= 5 && ($product->total_qty_in_stock ?? 0) > 0)
+                                <span class="position-absolute top-0 start-0 m-3 badge rounded-pill px-3 py-2"
+                                      style="background: rgba(255, 193, 7, 0.95); color: #000; font-size: 0.7rem; font-weight: 600; backdrop-filter: blur(10px);">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Low Stock
+                                </span>
+                            @elseif(($product->total_qty_in_stock ?? 0) == 0)
+                                <span class="position-absolute top-0 start-0 m-3 badge rounded-pill px-3 py-2"
+                                      style="background: rgba(220, 53, 69, 0.95); font-size: 0.7rem; font-weight: 600; backdrop-filter: blur(10px);">
+                                    <i class="bi bi-x-circle-fill me-1"></i>Out of Stock
+                                </span>
+                            @endif
                         </div>
 
                         <!-- Card Content -->
@@ -73,20 +84,57 @@
                                 {{ Str::limit($product->product_name, 30) }}
                             </h6>
 
-                            <!-- Price -->
+                            <!-- Stock Indicator -->
+                            <div class="mb-3 d-flex align-items-center gap-2">
+                                @php
+                                    $stock = $product->total_qty_in_stock ?? 0;
+                                    $stockClass = $stock > 10 ? 'success' : ($stock > 5 ? 'warning' : ($stock > 0 ? 'danger' : 'secondary'));
+                                @endphp
+                                <span class="badge bg-{{ $stockClass }}-subtle text-{{ $stockClass }} border border-{{ $stockClass }}"
+                                      style="font-size: 0.75rem; font-weight: 600;">
+                                    <i class="bi bi-box-seam me-1"></i>
+                                    Stock: {{ $stock }}
+                                </span>
+
+                                <!-- Visual Stock Bar -->
+                                <div class="flex-grow-1" style="height: 4px; background: #e9ecef; border-radius: 2px; overflow: hidden;">
+                                    @php
+                                        $maxStock = 20; // Adjust based on your inventory levels
+                                        $percentage = min(($stock / $maxStock) * 100, 100);
+                                    @endphp
+                                    <div style="width: {{ $percentage }}%; height: 100%; background:
+                                        @if($stock > 10) #198754
+                                        @elseif($stock > 5) #ffc107
+                                        @elseif($stock > 0) #dc3545
+                                        @else #6c757d
+                                        @endif; transition: width 0.3s ease;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price + Add Icon -->
                             <div class="d-flex align-items-center justify-content-between">
                                 <span class="fs-4 fw-bold text-success mb-0" style="letter-spacing: -0.5px;">
                                     ${{ number_format($product->price, 2) }}
                                 </span>
 
-                                <!-- Add to Cart Icon -->
-                                <div class="rounded-circle d-flex align-items-center justify-content-center"
-                                     style="width: 40px; height: 40px; background-color: #0d6efd; transition: all 0.2s ease;"
-                                     onmouseover="this.style.backgroundColor='#0b5ed7'; this.style.transform='rotate(12deg) scale(1.1)'"
-                                     onmouseout="this.style.backgroundColor='#0d6efd'; this.style.transform='rotate(0) scale(1)'">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center {{ ($product->stock ?? 0) == 0 ? 'disabled-cart' : '' }}"
+                                     style="width: 40px; height: 40px;
+                                            background-color: {{ ($product->total_qty_in_stock ?? 0) == 0 ? '#6c757d' : '#0d6efd' }};
+                                            transition: all 0.2s ease;
+                                            {{ ($product->total_qty_in_stock ?? 0) == 0 ? 'cursor: not-allowed; opacity: 0.5;' : '' }}"
+                                     @if(($product->total_qty_in_stock ?? 0) > 0)
+                                         onmouseover="this.style.backgroundColor='#0b5ed7'; this.style.transform='rotate(12deg) scale(1.1)'"
+                                     onmouseout="this.style.backgroundColor='#0d6efd'; this.style.transform='rotate(0) scale(1)'"
+                                    @endif>
                                     <svg width="18" height="18" fill="white" viewBox="0 0 16 16">
-                                        <path d="M9 5.5a.5.5 0 0 0-1 0V7H6.5a.5.5 0 0 0 0 1H8v1.5a.5.5 0 0 0 1 0V8h1.5a.5.5 0 0 0 0-1H9V5.5z"/>
-                                        <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1H.5zm3.915 10L3.102 4h10.796l-1.313 7h-8.17zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                                        @if(($product->total_qty_in_stock ?? 0) > 0)
+                                            <path d="M9 5.5a.5.5 0 0 0-1 0V7H6.5a.5.5 0 0 0 0 1H8v1.5a.5.5 0 0 0 1 0V8h1.5a.5.5 0 0 0 0-1H9V5.5z"/>
+                                            <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1H.5zm3.915 10L3.102 4h10.796l-1.313 7h-8.17zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                                        @else
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                        @endif
                                     </svg>
                                 </div>
                             </div>
@@ -97,7 +145,6 @@
 
         </div>
     </div>
-
     <!-- CART -->
     <div class="col cart-section">
         <div style="position: sticky; top: 110px; margin: 5px;">
@@ -107,21 +154,11 @@
                 </div>
             </div>
             <div class="cart-item row">
-                <div class="col">
-                    <p>Image</p>
-                </div>
-                <div class="col">
-                    <p>Name</p>
-                </div>
-                <div class="col">
-                    <p>Price</p>
-                </div>
-                <div class="col-4">
-                    <p>QTY</p>
-                </div>
-                <div class="d-flex justify-content-end col">
-                    <p>Remove</p>
-                </div>
+                <div class="col"><p>Image</p></div>
+                <div class="col"><p>Name</p></div>
+                <div class="col"><p>Price</p></div>
+                <div class="col-4"><p>QTY</p></div>
+                <div class="d-flex justify-content-end col"><p>Remove</p></div>
             </div>
         </div>
 
@@ -137,7 +174,7 @@
                 <h5>Payable Amount: <span id="total" class="float-end">$0.00</span></h5>
                 <div class="d-grid gap-2 mt-3">
                     <button class="btn btn-danger" id="cancelOrder">Cancel Order</button>
-                    <a href="{{url('/cash')}}" class="btn btn-success">Place Order</a>
+                    <a href="{{ url('/cash') }}" class="btn btn-success">Place Order</a>
                 </div>
             </div>
         </div>
@@ -153,132 +190,200 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Load cart from localStorage or initialize empty cart
-            let cart = JSON.parse(localStorage.getItem('shoppingCart')) || {};
-            let cartList = document.getElementById("cartList");
+            const cartKey = 'shoppingCart';
+            const stateKey = 'homeUIState';
+            let cart = JSON.parse(localStorage.getItem(cartKey)) || {};
+            const cartList = document.getElementById("cartList");
             let currentCategory = "all";
             let currentSearch = "";
 
-            // Save cart to localStorage whenever it changes
-            function saveCart() {
-                localStorage.setItem('shoppingCart', JSON.stringify(cart));
+            // helpers
+            const saveCart = () => localStorage.setItem(cartKey, JSON.stringify(cart));
+            const money = n => `$${Number(n || 0).toFixed(2)}`;
+
+            // clean legacy items
+            if (Object.values(cart).some(it => !it.product_id)) {
+                cart = {};
+                saveCart();
             }
+
+            // restore UI state (category/search)
+            try {
+                const saved = JSON.parse(localStorage.getItem(stateKey) || '{}');
+                if (saved.category) currentCategory = saved.category;
+                if (saved.search)   currentSearch   = saved.search;
+            } catch {}
 
             function updateCart() {
                 cartList.innerHTML = "";
                 let subtotal = 0;
-                Object.values(cart).forEach(item => {
-                    let row = document.createElement("div");
-                    row.className = "cart-item row align-items-center my-2";
-                    row.innerHTML = `
-                    <div class="col"><img src="${item.img}" width="40"></div>
-                    <div class="col"><span>${item.name}</span></div>
-                    <div class="col"><span>$${item.price.toFixed(2)}</span></div>
-                    <div class="col-4">
-                        <button class="btn btn-outline-success btn-sm qty-plus" data-name="${item.name}">+</button>
-                        <span class="mx-2">${item.qty}</span>
-                        <button class="btn btn-outline-danger btn-sm qty-minus" data-name="${item.name}">-</button>
-                    </div>
-                    <div class="d-flex justify-content-end col">
-                        <button class="btn btn-outline-danger btn-sm remove-item" data-name="${item.name}">x</button>
-                    </div>
-                `;
-                    cartList.appendChild(row);
-                    subtotal += item.price * item.qty;
-                });
-                // Totals
-                document.getElementById("subtotal").textContent = `$${subtotal.toFixed(2)}`;
-                let tax = subtotal * 0.1;
-                document.getElementById("tax").textContent = `$${tax.toFixed(2)}`;
-                let discount = subtotal > 20 ? 2 : 0; // example discount
-                document.getElementById("discount").textContent = `$${discount.toFixed(2)}`;
-                document.getElementById("total").textContent = `$${(subtotal + tax - discount).toFixed(2)}`;
 
-                // Save to localStorage after every update
+                Object.values(cart).forEach(item => {
+                    const line = Number(item.price) * Number(item.qty);
+                    subtotal += line;
+
+                    const row = document.createElement("div");
+                    row.className = "cart-item row align-items-center my-2";
+
+                    const remaining = Math.max(0, (parseInt(item.maxStock ?? 0, 10)) - (parseInt(item.qty ?? 0, 10)));
+                    row.innerHTML = `
+        <div class="col"><img src="${item.img}" width="40" alt=""></div>
+        <div class="col">
+          <span>${item.name}</span>
+          <div class="small text-muted">${remaining} left</div>
+        </div>
+        <div class="col"><span>${money(item.price)}</span></div>
+        <div class="col-4">
+          <button class="btn btn-outline-success btn-sm qty-plus" data-id="${item.product_id}">+</button>
+          <span class="mx-2">${item.qty}</span>
+          <button class="btn btn-outline-danger btn-sm qty-minus" data-id="${item.product_id}">-</button>
+        </div>
+        <div class="d-flex justify-content-end col">
+          <button class="btn btn-outline-danger btn-sm remove-item" data-id="${item.product_id}">x</button>
+        </div>
+      `;
+                    cartList.appendChild(row);
+                });
+
+                const tax = subtotal * 0.10;
+                const discount = subtotal > 20 ? 2 : 0;
+                const total = subtotal + tax - discount;
+
+                document.getElementById("subtotal").textContent = money(subtotal);
+                document.getElementById("tax").textContent      = money(tax);
+                document.getElementById("discount").textContent = money(discount);
+                document.getElementById("total").textContent    = money(total);
+
                 saveCart();
             }
 
             function filterProducts() {
                 document.querySelectorAll(".product-item").forEach(item => {
-                    let product = item.querySelector(".product-card");
-                    let category = product.dataset.category;
-                    let searchText = product.dataset.search;
-
-                    let categoryMatch = currentCategory === "all" || category === currentCategory;
-                    let searchMatch = currentSearch === "" || searchText.includes(currentSearch);
-
-                    if (categoryMatch && searchMatch) {
-                        item.style.display = "block";
-                    } else {
-                        item.style.display = "none";
-                    }
+                    const card = item.querySelector(".product-card");
+                    const category = card.dataset.category;
+                    const searchText = (card.dataset.search || '').toLowerCase();
+                    const categoryMatch = currentCategory === "all" || category === currentCategory;
+                    const searchMatch = currentSearch === "" || searchText.includes(currentSearch);
+                    item.style.display = (categoryMatch && searchMatch) ? "block" : "none";
                 });
             }
 
-            // Add product
-            document.querySelectorAll(".add-to-cart").forEach(product => {
-                product.addEventListener("click", function() {
-                    let name = this.dataset.name;
-                    let price = parseFloat(this.dataset.price);
-                    let img = this.dataset.img;
-                    if (cart[name]) {
-                        cart[name].qty++;
+            // Add product (stores product_id) — with stock guard
+            document.querySelectorAll(".add-to-cart").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const productId = this.dataset.productId || this.dataset.id;
+                    const name  = this.dataset.name;
+                    const price = parseFloat(this.dataset.price);
+                    const img   = this.dataset.img || '';
+                    const maxStock = parseInt(this.dataset.stock || '0', 10);
+
+                    if (!productId) {
+                        alert('Missing product_id on Add button. Add data-product-id to the card.');
+                        return;
+                    }
+                    // hard block if no stock
+                    if (maxStock <= 0) { alert('Out of stock'); return; }
+
+                    const current = cart[productId]?.qty || 0;
+                    if (maxStock > 0 && current >= maxStock) {
+                        alert('No more stock for this product.');
+                        return;
+                    }
+
+                    if (cart[productId]) {
+                        cart[productId].qty += 1;
                     } else {
-                        cart[name] = {
+                        cart[productId] = {
+                            product_id: productId,
                             name,
                             price,
                             img,
-                            qty: 1
+                            qty: 1,
+                            maxStock: maxStock
                         };
                     }
+                    // keep maxStock synced if DOM changed
+                    cart[productId].maxStock = maxStock;
                     updateCart();
                 });
             });
 
-            // Cart actions
+            // Cart actions — clamp to stock
             cartList.addEventListener("click", function(e) {
-                let name = e.target.dataset.name;
+                const id = e.target.dataset.id;
+                if (!id) return;
+
                 if (e.target.classList.contains("qty-plus")) {
-                    cart[name].qty++;
+                    const maxStock = parseInt(cart[id]?.maxStock ?? 0, 10);
+                    const qty = parseInt(cart[id]?.qty ?? 0, 10);
+                    if (maxStock > 0 && qty >= maxStock) {
+                        alert('No more stock for this product.');
+                        return;
+                    }
+                    if (cart[id]) cart[id].qty += 1;
+
                 } else if (e.target.classList.contains("qty-minus")) {
-                    cart[name].qty--;
-                    if (cart[name].qty <= 0) delete cart[name];
+                    if (cart[id]) {
+                        cart[id].qty -= 1;
+                        if (cart[id].qty <= 0) delete cart[id];
+                    }
+
                 } else if (e.target.classList.contains("remove-item")) {
-                    delete cart[name];
+                    delete cart[id];
                 }
                 updateCart();
             });
 
-            // Cancel order → clear cart
-            document.getElementById("cancelOrder").addEventListener("click", function() {
-                if (confirm("Are you sure you want to clear your cart?")) {
-                    cart = {};
-                    updateCart();
-                    // Also clear from localStorage
-                    localStorage.removeItem('shoppingCart');
-                }
-            });
+            // Clear cart
+            const cancelBtn = document.getElementById("cancelOrder");
+            if (cancelBtn) {
+                cancelBtn.addEventListener("click", function() {
+                    if (confirm("Are you sure you want to clear your cart?")) {
+                        cart = {};
+                        localStorage.removeItem(cartKey);
+                        updateCart();
+                    }
+                });
+            }
 
-            // Filter by category
+            // Filters — persist choice
             document.querySelectorAll(".filter-btn").forEach(btn => {
-                btn.addEventListener("click", function() {
-                    // Remove active class from all buttons
-                    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-                    // Add active class to clicked button
-                    this.classList.add("active");
+                // restore active state
+                if (btn.dataset.category === currentCategory) btn.classList.add('active');
 
-                    currentCategory = this.dataset.category;
+                btn.addEventListener("click", function() {
+                    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+                    this.classList.add("active");
+                    currentCategory = this.dataset.category || 'all';
+                    localStorage.setItem(stateKey, JSON.stringify({ category: currentCategory, search: currentSearch }));
                     filterProducts();
                 });
             });
 
-            // Search functionality
-            document.getElementById("searchInput").addEventListener("input", function() {
-                currentSearch = this.value.toLowerCase().trim();
-                filterProducts();
-            });
+            // Search — debounced + persist
+            const searchInput = document.getElementById("searchInput");
+            if (searchInput) {
+                if (currentSearch) searchInput.value = currentSearch;
+                let t;
+                searchInput.addEventListener("input", function() {
+                    clearTimeout(t);
+                    const val = this.value.toLowerCase().trim();
+                    t = setTimeout(() => {
+                        currentSearch = val;
+                        localStorage.setItem(stateKey, JSON.stringify({ category: currentCategory, search: currentSearch }));
+                        filterProducts();
+                    }, 200);
+                });
+            }
 
-            // Initialize cart display on page load
+            // init render
+            filterProducts();
+            // ensure each cart item has maxStock from DOM (helps when coming from previous session)
+            for (const [pid, item] of Object.entries(cart)) {
+                const el = document.querySelector(`.product-card[data-product-id="${pid}"]`);
+                const maxStock = parseInt(el?.dataset.stock || item.maxStock || '0', 10);
+                item.maxStock = maxStock;
+            }
             updateCart();
         });
     </script>

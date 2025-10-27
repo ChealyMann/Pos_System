@@ -23,6 +23,8 @@
 
                 <strong>{{ $user->user_name }}</strong>
 
+                <strong>Role : {{ $user->role->role_name }}</strong>
+
 
             @endif
         </div>
