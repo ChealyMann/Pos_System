@@ -101,10 +101,7 @@
                         <label class="form-label fw-bold">Cost (1 Unit)</label>
                         <input type="number" id="cost" class="form-control bg-white" value="0" step="0.01" />
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-bold">Expire Date (Optional)</label>
-                        <input type="date" id="expire" class="form-control bg-white" />
-                    </div>
+
                     <div class="col-md-12 d-flex justify-content-end mt-3">
                         <button type="button" id="addRow" class="btn ms-3"
                                 style="background:#18a05e; color:#fff; min-width:180px;">Add more</button>
@@ -121,7 +118,6 @@
                                 <th>Product Name</th>
                                 <th>Quantity</th>
                                 <th>Cost</th>
-                                <th>Expired Date</th>
                                 <th>Sub Total</th>
                                 <th>Action</th>
                             </tr>
@@ -164,7 +160,7 @@
             let productSelect = document.getElementById("product");
             let qtyInput = document.getElementById("qty");
             let costInput = document.getElementById("cost");
-            let expireInput = document.getElementById("expire");
+
 
             // When product is selected, auto-fill the cost
             productSelect.addEventListener("change", function() {
@@ -210,7 +206,7 @@
 
                 let qty = parseInt(qtyInput.value);
                 let cost = parseFloat(costInput.value);
-                let expire = expireInput.value; // Expire date is optional
+
 
                 if (qty <= 0 || cost < 0) {
                     alert("Please enter valid QTY and Cost!");
@@ -238,9 +234,7 @@
                 <td>
                     <input type="number" name="products[${rowIdx}][unit_cost]" value="${cost}" class="form-control bg-white row-input-cost" style="width: 100px;" min="0" step="0.01">
                 </td>
-                <td>
-                    <input type="date" name="products[${rowIdx}][expiry_date]" value="${expire}" class="form-control bg-white">
-                </td>
+
                 <td>$${subTotal.toFixed(2)}</td>
                 <td>
                     <button type="button" class="btn btn-danger btn-sm rounded-circle remove-row">
@@ -257,7 +251,7 @@
                 productSelect.value = "";
                 qtyInput.value = "1";
                 costInput.value = "0";
-                expireInput.value = "";
+
             });
 
             // Remove row

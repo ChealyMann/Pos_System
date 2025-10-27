@@ -88,7 +88,6 @@
                         'qty' => $productData['qty'],
                         'unit_cost' => $productData['unit_cost'],
                         'total_cost' => $totalCost,
-                        'expiry_date' => $productData['expiry_date'] ?? null,
                     ]);
 
                     // Add to the grand total
@@ -211,7 +210,7 @@
                         'qty' => $productData['qty'],
                         'unit_cost' => $productData['unit_cost'],
                         'total_cost' => $totalCost,
-                        'expiry_date' => $productData['expiry_date'] ?? null,
+
                     ]);
                     $totalAmount += $totalCost;
 

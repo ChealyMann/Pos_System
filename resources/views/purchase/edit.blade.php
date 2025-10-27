@@ -89,10 +89,6 @@
                         <input type="number" id="cost" class="form-control bg-white" value="0" step="0.01" />
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label fw-bold">Expire Date (Optional)</label>
-                        <input type="date" id="expire" class="form-control bg-white" />
-                    </div>
 
                     <div class="col-md-12 d-flex justify-content-end mt-3">
                         <button type="button" id="addRow" class="btn ms-3"
@@ -109,7 +105,7 @@
                                 <th>Product Name</th>
                                 <th>Quantity</th>
                                 <th>Cost</th>
-                                <th>Expired Date</th>
+
                                 <th>Sub Total</th>
                                 <th>Action</th>
                             </tr>
@@ -131,11 +127,7 @@
                                         <input type="number" name="products[{{ $index }}][unit_cost]" value="{{ $item->unit_cost }}"
                                                class="form-control bg-white row-input-cost" style="width: 100px;" min="0" step="0.01" required>
                                     </td>
-                                    <td>
-                                        <input type="date" name="products[{{ $index }}][expiry_date]"
-                                               value="{{ $item->expiry_date ? $item->expiry_date->format('Y-m-d') : '' }}"
-                                               class="form-control bg-white">
-                                    </td>
+
                                     <td class="subtotal-cell">${{ number_format($item->qty * $item->unit_cost, 2) }}</td>
                                     <td>
                                         <button type="button" class="btn btn-danger btn-sm rounded-circle remove-row">
@@ -181,7 +173,7 @@
             let productSelect = document.getElementById("product");
             let qtyInput = document.getElementById("qty");
             let costInput = document.getElementById("cost");
-            let expireInput = document.getElementById("expire");
+
 
             // Auto-fill cost when product is selected
             productSelect.addEventListener("change", function() {
@@ -237,7 +229,7 @@
 
                 let qty = parseInt(qtyInput.value) || 1;
                 let cost = parseFloat(costInput.value) || 0;
-                let expire = expireInput.value;
+
 
                 if (qty <= 0 || cost < 0) {
                     alert("Please enter valid QTY and Cost!");
@@ -265,10 +257,7 @@
                         <input type="number" name="products[${rowIdx}][unit_cost]" value="${cost}"
                                class="form-control bg-white row-input-cost" style="width: 100px;" min="0" step="0.01" required>
                     </td>
-                    <td>
-                        <input type="date" name="products[${rowIdx}][expiry_date]" value="${expire}"
-                               class="form-control bg-white">
-                    </td>
+
                     <td class="subtotal-cell">$${subTotal.toFixed(2)}</td>
                     <td>
                         <button type="button" class="btn btn-danger btn-sm rounded-circle remove-row">
@@ -286,7 +275,7 @@
                 productSelect.value = "";
                 qtyInput.value = "1";
                 costInput.value = "0";
-                expireInput.value = "";
+
             });
 
             // Remove row
