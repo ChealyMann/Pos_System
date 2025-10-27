@@ -17,7 +17,7 @@
             ]);
 
             // Check if username exists
-            $user = User::where('user_name', $request->user_name)->first();
+            $user = User::where('user_name', $request->user_name)->where('status','active')->first();
             if (!$user) {
                 return back()->withErrors([
                     'user_name' => 'Username not found'
