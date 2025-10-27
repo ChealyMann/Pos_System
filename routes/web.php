@@ -105,3 +105,5 @@
         Route::resource('/sale', SaleController::class);
         Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
     });
+
+
