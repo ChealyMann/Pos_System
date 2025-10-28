@@ -42,4 +42,9 @@
         {
             return $this->belongsTo(\App\Models\Categorie::class, 'category_id', 'category_id');
         }
+
+        public function purchaseItems()
+        {
+            return $this->hasMany(Purchase_item::class, 'product_id', 'product_id');
+        }
     }

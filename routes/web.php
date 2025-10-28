@@ -60,6 +60,10 @@
             Route::post('/store', [StockController::class, 'store'])->name('store');
         });
 
+        Route::post('/get-product-by-purchase', [StockInController::class, 'getProductByPurchase'])
+            ->name('get_product.by_purchase');
+
+
         // Role Routes
         Route::controller(RoleController::class)->group(function () {
             Route::get('role/', 'index')->name('role.index');

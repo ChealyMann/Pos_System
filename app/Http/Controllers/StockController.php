@@ -12,7 +12,6 @@ class StockController extends Controller
 {
     public function index()
     {
-        $products = Product::all();
         $purchases = Purchase::all();
 
         $stocks = DB::table('stocks as s')
@@ -26,6 +25,6 @@ class StockController extends Controller
             )
             ->get();
 
-        return view('stock.index', compact('stocks', 'products', 'purchases'));
+        return view('stock.index', compact('stocks', 'purchases'));
     }
 }
