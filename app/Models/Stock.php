@@ -15,4 +15,9 @@ class Stock extends Model
         'avg_cost',
         'total_qty_in_stock',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'product_id');
+    }
 }

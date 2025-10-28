@@ -16,12 +16,6 @@
         protected $table = 'purchases_details';
         protected $primaryKey = 'purchase_detail_id';
 
-        /**
-         * The attributes that should be cast.
-         * This will automatically convert 'expiry_date' to a Carbon date object.
-         *
-         * @var array
-         */
         protected $casts = [
             'expiry_date' => 'datetime',
         ];

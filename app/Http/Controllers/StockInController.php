@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Stock_in;
 use App\Models\Stock;
 use App\Models\Product;
+use App\Models\Purchase_item;
 
 class StockInController extends Controller
 {
@@ -25,7 +26,7 @@ class StockInController extends Controller
                 'product_id'     => 'required|integer|exists:products,product_id',
                 'cost_per_item'  => 'required|numeric|min:0',
                 'qty'            => 'required|integer|min:1',
-                'expire_date'    => 'nullable|date',
+                'expire_date'    => 'required|date_format:Y-m-d|after:today',
             ]);
 
             $validatedData['created_by'] = $userId;
@@ -56,4 +57,18 @@ class StockInController extends Controller
             return redirect()->route('stock.index')
                             ->with('success', 'Stock added successfully!');
     }
+
+    public function getProductByPurchase(Request $request)
+    {
+        if (!$request->has('purchase_id')) {
+            return response()->json(['error' => 'Missing purchase_id'], 400);
+        }
+
+        $products = Purchase_item::with('product')
+            ->where('purchase_id', $request->purchase_id)
+            ->get();
+
+        return response()->json($products);
+    }
+
 }
